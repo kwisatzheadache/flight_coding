@@ -32,7 +32,13 @@ defmodule Neuron do
   Creates neurons corresponding to the size of nn desired. 
   """
   def create(size) do
-    hld = HLD.generate(size)
+    hld = case is_atom(size) do
+          true -> 
+            HLD.generate(size)
+          _ -> IO.puts "HLD selected randomly"
+                [bottom] = Enum.take_random(1..7, 1)
+                HLD.generate(bottom, bottom + 2)
+          end
   end
 end
 
@@ -46,14 +52,12 @@ defmodule HLD do
   Accepts three sizes of hld - :small, :medium, :large
   It creates a list of HLD with a depth and width randomly generated in the given size.
   """
-  def generate(size) when is_atom(size) do
-    true ->
-      case size do
-        :small -> HLD.generate(1, 3)
-        :medium -> HLD.generate(3, 5)
-        :large -> HLD.generate(6, 9)
-      end
-    _ -> IO.puts "HLD size must be one of the following atoms - :small, :medium, or :large"
+  def generate(size) do
+    case size do
+      :small -> HLD.generate(1, 3)
+      :medium -> HLD.generate(3, 5)
+      :large -> HLD.generate(7, 9)
+    end
   end
 
   @doc"""
