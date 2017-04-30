@@ -39,6 +39,14 @@ defmodule Neuron do
                 [bottom] = Enum.take_random(1..7, 1)
                 HLD.generate(bottom, bottom + 2)
           end
+    layers(hld, [])
+  end
+
+  @doc"""
+  Create layers of neurons based on HLD.
+  """
+  def layers(hld, acc) do
+    
   end
 end
 

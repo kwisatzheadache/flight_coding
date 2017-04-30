@@ -1,6 +1,7 @@
 # NnFlightCoding
 
-**TODO: Add description**
+I suppose I really should have called it InFlightCoding, because this is just an
+exercise to pass the time on an airplane. 
 
 ## Installation
 
