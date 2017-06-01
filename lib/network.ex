@@ -15,7 +15,7 @@ defmodule Network do
   end
 
   def create(type, scape, size) do
-    neurons = Neuron.create(size)
+    neurons = Neuron.generate(size)
     sensors = Sensor.create(scape)
     actuators = Actuator.create(scape)
     cortex = Cortex.create(scape, type)
@@ -31,7 +31,7 @@ defmodule Neuron do
   @doc"""
   Creates neurons corresponding to the size of nn desired. 
   """
-  def create(size) do
+  def generate(size) do
     hld = case is_atom(size) do
           true -> 
             HLD.generate(size)
@@ -39,14 +39,34 @@ defmodule Neuron do
                 [bottom] = Enum.take_random(1..7, 1)
                 HLD.generate(bottom, bottom + 2)
           end
-    layers(hld, [])
+    layers(hld, [], 0)
   end
 
   @doc"""
-  Create layers of neurons based on HLD.
+  Create layers of neurons based on HLD. Assigns index corresponding to layer depth according to HLD.
   """
-  def layers(hld, acc) do
-    
+  def layers(hld, acc, index) do
+    if length(hld) >= 1 do
+      [layer | rem] = hld
+      neurons = Neuron.create(layer, index + 1, [])
+      layers(rem, [neurons | acc], index + 1)
+    else
+      acc
+    end
+  end
+
+  def create(density, index, acc) do
+    neuron = {{:neuron, Generate.id}, {:weights}, {:index, index}}
+    case density do
+      0 -> acc
+      _ -> create(density - 1, index, [neuron | acc])
+    end
+  end
+end
+
+defmodule Generate do
+  def id() do
+    :random.uniform()
   end
 end
 
@@ -65,6 +85,7 @@ defmodule HLD do
       :small -> HLD.generate(1, 3)
       :medium -> HLD.generate(3, 5)
       :large -> HLD.generate(7, 9)
+      :massive -> HLD.generate(30, 32)
     end
   end
 
