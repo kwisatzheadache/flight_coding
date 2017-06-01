@@ -22,6 +22,35 @@ defmodule Network do
   end
 end
 
+defmodule Sensor do
+  @moduledoc"""
+  Sensors receive the input from the scape. As such, they ought to be tailored for each scape.
+  We'll use a macro to call the module from the Sensor type.
+  """
+
+  defstruct id: nil, cx_id: nil, name: nil, scape: nil, vl: nil, fanout_ids: nil
+
+  defmacro type(name) do
+    quote do
+      {{:., [], [{:__aliases__, [alias: false], [:Morphology]}, unquote(name)]}, [], [:sensor]}
+    end
+  end
+  @doc"""
+  """
+  def generate(type) do
+  end
+end
+
+defmodule Morphology do
+  def RNG(interactor) do
+    case interactor do
+      :sensor ->
+        [%Sensor{id: {:sensor, Generate.id()}, name: :xor_getinput, scape: {:private, xor_sim}, vl: 2}]
+      :actuator ->
+         [%Actuator{id: {:actuator, Generate.id()}, name: :xor_sendoutput, scape: {:private, xor_sim}, vl: 1}]
+    end
+  end
+end
 
 defmodule Neuron do
   @moduledoc"""
@@ -43,7 +72,7 @@ defmodule Neuron do
   end
 
   @doc"""
-  Create layers of neurons based on HLD. Assigns index corresponding to layer depth according to HLD.
+  Generate layers of neurons based on HLD. Assigns index corresponding to layer depth according to HLD.
   """
   def layers(hld, acc, index) do
     if length(hld) >= 1 do
@@ -51,10 +80,13 @@ defmodule Neuron do
       neurons = Neuron.create(layer, index + 1, [])
       layers(rem, [neurons | acc], index + 1)
     else
-      acc
+      List.flatten(acc)
     end
   end
 
+  @doc"""
+  Create neurons, assign weight and index, along with random ID.
+  """
   def create(density, index, acc) do
     neuron = {{:neuron, Generate.id}, {:weights}, {:index, index}}
     case density do
