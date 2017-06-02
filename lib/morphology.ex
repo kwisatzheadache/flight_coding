@@ -1,4 +1,3 @@
-
 defmodule Morphology do
   def rng(interactor) do
     case interactor do
