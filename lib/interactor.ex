@@ -6,15 +6,15 @@ defmodule Interactor do
 
   defstruct id: nil, pid: nil, cx_id: nil, name: nil, scape: nil, vl: nil, fanout_ids: nil
 
-  defmacro type(name, interactor) do
+  defmacro type(morph, interactor) do
     quote do
-      {{:., [], [{:__aliases__, [alias: false], [:Morphology]}, unquote(name)]}, [], [interactor]}
+      {{:., [], [{:__aliases__, [alias: false], [:Morphology]}, unquote(morph)]}, [], [unquote(interactor)]}
     end
   end
   @doc"""
   """
   def generate(morph, interactor) do
-    type(morph, interactor)
+    Code.eval_quoted(type(morph, interactor))
   end
 end
 
