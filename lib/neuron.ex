@@ -4,6 +4,8 @@ defmodule Neuron do
   Neurons have the format {{:neuron, .37374628}, {weights}}
   """
 
+  defstruct id: nil, pid: nil, af: :tanh, input_neurons: [], output_neurons: [], index: nil, weights: nil
+
   @doc"""
   Creates neurons corresponding to the size of nn desired. 
   """
@@ -33,9 +35,14 @@ defmodule Neuron do
 
   @doc"""
   Create neurons, assign weight and index, along with random ID.
+  Default create() creates a single neuron, calling create(1, 1, [])
   """
+  def create do
+    create(1, 1, [])
+  end
+
   def create(density, index, acc) do
-    neuron = {{:neuron, Generate.id}, {:weights}, {:index, index}}
+    neuron = [%Neuron{id: {:neuron, Generate.id}, weights: {:weights}, index: index}]
     case density do
       0 -> acc
       _ -> create(density - 1, index, [neuron | acc])

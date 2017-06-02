@@ -23,19 +23,16 @@ defmodule Network do
 
   def create(type, scape, size) do
     neurons = Neuron.generate(size)
-    IO.inspect neurons
     sensors =   case is_atom(scape) do
                   true -> Interactor.generate(scape, :sensor)
                   false -> IO.puts "Error: scape must be atom, :rng, :cube, or xor_sim for example"
                 end
-    IO.inspect sensors
     actuators = case is_atom(scape) do
                   true -> Interactor.generate(scape, :actuator)
                   false -> IO.puts "Error: scape must be atom, :rng, :cube, or xor_sim for example"
                 end
-    IO.inspect actuators
     cortex = Cortex.generate(scape, type)
-    IO.inspect cortex
+    [neurons, sensors, actuators, cortex]
   end
 end
 

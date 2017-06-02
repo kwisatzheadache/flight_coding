@@ -14,7 +14,8 @@ defmodule Interactor do
   @doc"""
   """
   def generate(morph, interactor) do
-    Code.eval_quoted(type(morph, interactor))
+    {ast_eval, []} = Code.eval_quoted(type(morph, interactor))
+    ast_eval
   end
 end
 
