@@ -28,6 +28,10 @@ defmodule NnFlightCoding.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    []
+    [
+    {:matrix, "~> 0.3.0"},
+    {:plug, "~> 1.1.0"},
+    {:credo, "~> 0.7.2"}
+    ]
   end
 end

@@ -1,4 +1,11 @@
 defmodule Morphology do
+  @moduledoc """
+  Creates the sensor and actuator. Called by the interactor macro. 
+  """
+
+  @doc"""
+  Random Number Generator
+  """
   def rng(interactor) do
     case interactor do
       :sensor ->
@@ -8,6 +15,9 @@ defmodule Morphology do
     end
   end
 
+  @doc"""
+  Scape for working with rubix cube
+  """
   def cube(interactor) do
     case interactor do
       :sensor ->
@@ -17,6 +27,9 @@ defmodule Morphology do
     end
   end
 
+  @doc"""
+  XOR logic gate
+  """
   def xor(interactor) do
     case interactor do
       :sensor ->
