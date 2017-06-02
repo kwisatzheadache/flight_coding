@@ -28,7 +28,7 @@ defmodule Sensor do
   We'll use a macro to call the module from the Sensor type.
   """
 
-  defstruct id: nil, cx_id: nil, name: nil, scape: nil, vl: nil, fanout_ids: nil
+  defstruct id: nil, pid: nil, cx_id: nil, name: nil, scape: nil, vl: nil, fanout_ids: nil
 
   defmacro type(name) do
     quote do
@@ -42,12 +42,30 @@ defmodule Sensor do
 end
 
 defmodule Morphology do
-  def RNG(interactor) do
+  def rng(interactor) do
     case interactor do
       :sensor ->
-        [%Sensor{id: {:sensor, Generate.id()}, name: :xor_getinput, scape: {:private, xor_sim}, vl: 2}]
+        [%Sensor{id: {:sensor, Generate.id()}, name: :rng_getinput, scape: {:private, :rng_sim}, vl: 2}]
       :actuator ->
-         [%Actuator{id: {:actuator, Generate.id()}, name: :xor_sendoutput, scape: {:private, xor_sim}, vl: 1}]
+         [%Actuator{id: {:actuator, Generate.id()}, name: :rng_sendoutput, scape: {:private, :rng_sim}, vl: 1}]
+    end
+  end
+
+  def cube(interactor) do
+    case interactor do
+      :sensor ->
+        [%Sensor{id: {:sensor, Generate.id()}, name: :cube_getinput, scape: {:private, :cube_sim}, vl: 2}]
+      :actuator ->
+         [%Actuator{id: {:actuator, Generate.id()}, name: :cube_sendoutput, scape: {:private, :cube_sim}, vl: 1}]
+    end
+  end
+
+  def xor(interactor) do
+    case interactor do
+      :sensor ->
+        [%Sensor{id: {:sensor, Generate.id()}, name: :xor_getinput, scape: {:private, :xor_sim}, vl: 2}]
+      :actuator ->
+         [%Actuator{id: {:actuator, Generate.id()}, name: :xor_sendoutput, scape: {:private, :xor_sim}, vl: 1}]
     end
   end
 end
