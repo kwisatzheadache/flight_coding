@@ -66,20 +66,25 @@ defmodule Neuron do
   Neuron.input_neurons(neurons, sensors, index)
   """
   def input_neurons(neurons, sensors, index) do
-    filtered_ids = case index == 1 do
+    case index == 1 do
           true ->  Enum.map(sensors, fn x -> x.id end)
-          false -> Enum.filter(neurons, fn x -> x.index == index - 1 end)
-                            |> Enum.map(fn x -> x.id end)
+          false -> neurons
+                   |> Enum.filter(fn x -> x.index == index - 1 end)
+                   |> Enum.map(fn x -> x.id end)
     end
   end
 
+  @doc"""
+  Same as input_neurons(), creates a list of output ids. For the final layer, actuators are used.
+  """
   def output_neurons(neurons, actuators, index) do
     max = Enum.max(Enum.map(neurons, fn x -> x.index end))
-    filtered_ids = case index == max do
-                     false -> Enum.filter(neurons, fn x -> x.index + 1 end)
-                            |> Enum.map(fn x -> x.id end)
-                     true  -> Enum.map(actuators, fn x -> x.id end)
-                   end
+    case index == max do
+      false -> neurons
+            |> Enum.filter(fn x -> x.index + 1 end)
+            |> Enum.map(fn x -> x.id end)
+      true  -> Enum.map(actuators, fn x -> x.id end)
+    end
   end
 end
 
