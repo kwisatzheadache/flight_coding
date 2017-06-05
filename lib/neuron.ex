@@ -48,5 +48,38 @@ defmodule Neuron do
       _ -> create(density - 1, index, [neuron | acc])
     end
   end
+
+  @doc"""
+  Receives the list of neurons and interactors. Reads the index values and assigns
+  input and output neurons, such that each neuron feeds forward.
+  """
+  def assign_inputs_and_outputs(neurons, sensors, actuators) do
+    Enum.map(neurons, fn x ->  %{x | input_neurons: input_neurons(neurons, sensors, x.index),
+                                     output_neurons: output_neurons(neurons, actuators, x.index)
+                                } end)
+  end
+
+  @doc"""
+  Grabs the neurons with corresponding index value, creates list with their ids. For the first layer,
+  it grabs the sensors.
+
+  Neuron.input_neurons(neurons, sensors, index)
+  """
+  def input_neurons(neurons, sensors, index) do
+    filtered_ids = case index==1 do
+          true ->  Enum.map(sensors, fn x -> x.id end)
+          false -> Enum.filter(neurons, fn x -> x.index == index - 1 end)
+                            |> Enum.map(fn x -> x.id end)
+    end
+  end
+
+  def output_neurons(neurons, actuators, index) do
+    max = Enum.max(Enum.map(neurons, fn x -> x.index end))
+    filtered_ids = case index == max do
+                     false -> Enum.filter(neurons, fn x -> x.index + 1 end)
+                            |> Enum.map(fn x -> x.id end)
+                     true  -> Enum.map(actuators, fn x -> x.id end)
+                   end
+  end
 end
 
