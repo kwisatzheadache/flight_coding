@@ -8,7 +8,8 @@ defmodule Interactor do
 
   defmacro type(morph, interactor) do
     quote do
-      {{:., [], [{:__aliases__, [alias: false], [:Morphology]}, unquote(morph)]}, [], [unquote(interactor)]}
+      # {{:., [], [{:__aliases__, [alias: false], [:Morphology]}, unquote(morph)]}, [], [unquote(interactor)]}
+      {{:., [], [{:__aliases__, [alias: false], [:Morphology]}, :set]}, [], [unquote(morph), unquote(interactor)]}
     end
   end
   @doc"""
