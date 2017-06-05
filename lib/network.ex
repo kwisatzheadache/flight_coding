@@ -32,7 +32,8 @@ defmodule Network do
                   false -> IO.puts "Error: scape must be atom, :rng, :cube, or xor_sim for example"
                 end
     cortex = Cortex.generate(scape, type)
-    [neurons, sensors, actuators, cortex]
+    neurons_with_inputs_and_outputs = Neuron.assign_inputs_and_outputs(neurons, sensors, actuators)
+    [neurons_with_inputs_and_outputs, sensors, actuators, cortex]
   end
 end
 

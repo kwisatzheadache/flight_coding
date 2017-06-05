@@ -2,7 +2,7 @@ defmodule NnFlightCodingTest do
   use ExUnit.Case
   doctest NnFlightCoding
 
-  test "the truth" do
-    assert 1 + 1 == 2
+  test "What can I do?" do
+    Network.create
   end
 end

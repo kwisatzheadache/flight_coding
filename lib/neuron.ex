@@ -66,7 +66,7 @@ defmodule Neuron do
   Neuron.input_neurons(neurons, sensors, index)
   """
   def input_neurons(neurons, sensors, index) do
-    filtered_ids = case index==1 do
+    filtered_ids = case index == 1 do
           true ->  Enum.map(sensors, fn x -> x.id end)
           false -> Enum.filter(neurons, fn x -> x.index == index - 1 end)
                             |> Enum.map(fn x -> x.id end)
