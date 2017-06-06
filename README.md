@@ -6,7 +6,7 @@ from scratch, of a functional Neural Net constructor.
 I will endeavor to ensure that the simple command ``` Network.create ``` will show off the extent of this 
 project's capacities. Please, feel free to fork and pick up wherever I leave off.
 
-##Currently, 
+## Currently, 
 
 It is fully functioning as a genotype generator. 
 
