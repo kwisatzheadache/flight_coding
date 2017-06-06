@@ -33,9 +33,30 @@ defmodule Network do
     neurons = Enum.map(n_loaded, fn x -> %{x | cx_id: cortex.id} end)
     sensors = Enum.map(s, fn x -> %{x | cx_id: cortex.id} end)
     actuators = Enum.map(a, fn x -> %{x | cx_id: cortex.id} end)
-    [neurons, sensors, actuators, [cortex]]
+    genotype = [neurons, sensors, actuators, [cortex]]  
+    Agent.start_link fn -> genotype end
     else
       IO.puts "Error: scape must be an atom, ie :rng"
+    end
+  end
+
+  @doc"""
+  Receives phenotype and "activates" all nodes.
+  """
+  def activate(genotype) do
+    [neurons, sensors, actuators, [cortex]] = genotype
+    cx_id = cortex.id
+    set_pids(neurons, genotype)
+    set_pids(sensors, genotype)
+    set_pids(actuators, genotype)
+  end
+
+  def set_pids(list, genotype) do
+    [head | tail] = list
+    case head.id do
+      {:actuator} -> spawn(Interactor, :run, [:sensor, genotype]) 
+      {:sensor}   -> spawn(Interactor, :run, [:sensor, genotype])
+      {:neuron}   -> spawn(Neuron, :run, [genotype])
     end
   end
 end

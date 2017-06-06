@@ -6,7 +6,12 @@ from scratch, of a functional Neural Net constructor.
 I will endeavor to ensure that the simple command ``` Network.create ``` will show off the extent of this 
 project's capacities. Please, feel free to fork and pick up wherever I leave off.
 
-Currently, it is fully functioning as a phenotype generator. 
+##Currently, 
+
+It is fully functioning as a genotype generator. 
+
+Furthermore, the genotype is automatically started in a process so that it can be accessed quickly, 
+rather than passing it in each function call.
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed

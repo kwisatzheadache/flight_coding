@@ -86,5 +86,13 @@ defmodule Neuron do
             |> Enum.map(fn x -> x.id end)
     end
   end
+
+  def run(neurons) do
+    receive do
+      {:ok, {self, message}} -> send self, {:ok, message}
+      {:terminate} -> IO.puts "exiting neuron"
+                      Process.exit(self(), :normal)
+    end
+  end
 end
 
