@@ -22,18 +22,21 @@ defmodule Network do
   end
 
   def create(type, scape, size) do
-    neurons = Neuron.generate(size)
-    sensors =   case is_atom(scape) do
-                  true -> Interactor.generate(scape, :sensor)
-                  false -> IO.puts "Error: scape must be atom, :rng, :cube, or xor_sim for example"
-                end
-    actuators = case is_atom(scape) do
-                  true -> Interactor.generate(scape, :actuator)
-                  false -> IO.puts "Error: scape must be atom, :rng, :cube, or xor_sim for example"
-                end
-    cortex = Cortex.generate(scape, type)
-    neurons_with_inputs_and_outputs = Neuron.assign_inputs_and_outputs(neurons, sensors, actuators)
-    [neurons_with_inputs_and_outputs, sensors, actuators, cortex]
+    if is_atom(scape) do
+    [cortex] = Cortex.generate(scape, type)
+    n= Neuron.generate(size)
+    s= Interactor.generate(scape, :sensor)
+      |> Enum.map(fn x -> Interactor.fanout_neurons(x, n) end)
+    a= Interactor.generate(scape, :actuator)
+      |> Enum.map(fn x -> Interactor.fanin_neurons(x, n) end)
+    n_loaded = Neuron.assign_inputs_and_outputs(n, s, a)
+    neurons = Enum.map(n_loaded, fn x -> %{x | cx_id: cortex.id} end)
+    sensors = Enum.map(s, fn x -> %{x | cx_id: cortex.id} end)
+    actuators = Enum.map(a, fn x -> %{x | cx_id: cortex.id} end)
+    [neurons, sensors, actuators, [cortex]]
+    else
+      IO.puts "Error: scape must be an atom, ie :rng"
+    end
   end
 end
 

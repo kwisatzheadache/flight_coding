@@ -4,7 +4,7 @@ defmodule Neuron do
   Neurons have the format {{:neuron, .37374628}, {weights}}
   """
 
-  defstruct id: nil, pid: nil, af: :tanh, input_neurons: [], output_neurons: [], index: nil, weights: nil
+  defstruct cx_id: nil, id: nil, pid: nil, af: :tanh, input_neurons: [], output_neurons: [], index: nil, weights: nil
 
   @doc"""
   Creates neurons corresponding to the size of nn desired. 
@@ -80,10 +80,10 @@ defmodule Neuron do
   def output_neurons(neurons, actuators, index) do
     max = Enum.max(Enum.map(neurons, fn x -> x.index end))
     case index == max do
-      false -> neurons
-            |> Enum.filter(fn x -> x.index + 1 end)
-            |> Enum.map(fn x -> x.id end)
       true  -> Enum.map(actuators, fn x -> x.id end)
+      false -> neurons
+            |> Enum.filter(fn x -> x.index == index + 1 end)
+            |> Enum.map(fn x -> x.id end)
     end
   end
 end
