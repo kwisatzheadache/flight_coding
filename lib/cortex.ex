@@ -13,7 +13,15 @@ defmodule Cortex do
     end
   end
 
+  @doc"""
+  Sends init message to sensors, upon receiving :start message
+  """
   def run(genotype, table) do
-
+    receive do
+      {:start, _} -> Transmit.list(:sensors, genotype, :start)
+      {:terminate, _} -> Transmit.all(genotype, :terminate)
+                         IO.puts "terminating cortex"
+                         Process.exit(self(), :normal)
+    end
   end
 end
