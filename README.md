@@ -12,6 +12,8 @@ It is fully functioning as a genotype generator.
 
 Furthermore, the genotype is automatically started in a process so that it can be accessed quickly, 
 rather than passing it in each function call.
+
+6/7 - All nodes spawned and assigned pids. yay.
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed

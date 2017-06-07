@@ -24,6 +24,7 @@ defmodule Network do
   def create(type, scape, size) do
     if is_atom(scape) do
     [cortex] = Cortex.generate(scape, type)
+    table = :ets.new(:table, [:set, :private])
     n= Neuron.generate(size)
     s= Interactor.generate(scape, :sensor)
       |> Enum.map(fn x -> Interactor.fanout_neurons(x, n) end)
@@ -34,7 +35,10 @@ defmodule Network do
     sensors = Enum.map(s, fn x -> %{x | cx_id: cortex.id} end)
     actuators = Enum.map(a, fn x -> %{x | cx_id: cortex.id} end)
     genotype = [neurons, sensors, actuators, [cortex]]  
-    Agent.start_link fn -> genotype end
+    gen_pids(genotype, table)
+    geno_pids = Enum.map(List.flatten(genotype), fn x -> %{x | pid: :ets.lookup_element(table, x.id, 2)} end)
+#   Agent.start_link fn -> geno_pids end
+    geno_pids
     else
       IO.puts "Error: scape must be an atom, ie :rng"
     end
@@ -43,20 +47,27 @@ defmodule Network do
   @doc"""
   Receives phenotype and "activates" all nodes.
   """
-  def activate(genotype) do
+  def gen_pids(genotype, table) do
     [neurons, sensors, actuators, [cortex]] = genotype
     cx_id = cortex.id
-    set_pids(neurons, genotype)
-    set_pids(sensors, genotype)
-    set_pids(actuators, genotype)
+    cx_pid = spawn(Cortex, :run, [genotype, table])
+    cx_tuple = {cx_id, cx_pid}
+    n_list = set_pids(neurons, genotype)
+    s_list = set_pids(sensors, genotype)
+    a_list = set_pids(actuators, genotype)
+    full_list = List.flatten([n_list, s_list, a_list, cx_tuple])
+    Enum.each(full_list, fn x -> :ets.insert(table, x) end)
   end
 
+  @doc"""
+  Creates a list of tuples - {node_id, pid}
+  """
   def set_pids(list, genotype) do
     [head | tail] = list
     case head.id do
-      {:actuator} -> spawn(Interactor, :run, [:sensor, genotype]) 
-      {:sensor}   -> spawn(Interactor, :run, [:sensor, genotype])
-      {:neuron}   -> spawn(Neuron, :run, [genotype])
+      {:actuator, id} -> Enum.map(list, fn x -> {x.id, spawn(Interactor, :run, [:actuator, genotype])} end)
+      {:sensor, id}   -> Enum.map(list, fn x -> {x.id, spawn(Interactor, :run, [:sensor, genotype])} end)
+      {:neuron, id}   -> Enum.map(list, fn x -> {x.id, spawn(Neuron, :run, [x, genotype])} end)
     end
   end
 end

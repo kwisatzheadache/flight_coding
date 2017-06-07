@@ -12,4 +12,8 @@ defmodule Cortex do
       false -> IO.puts "scape and type must both be atoms"
     end
   end
+
+  def run(genotype, table) do
+
+  end
 end

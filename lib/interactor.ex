@@ -4,7 +4,7 @@ defmodule Interactor do
   We'll use a macro to call the module from the Sensor type.
   """
 
-  defstruct id: nil, pid: nil, cx_id: nil, name: nil, scape: nil, vl: nil, fanout_ids: nil, fanin_ids: nil, index: nil
+  defstruct id: nil, pid: nil, cx_id: nil, name: nil, scape: nil, vl: nil, fanout_ids: "no fanouts for actuator", fanin_ids: "no fanins for sensor", index: nil
 
   defmacro type(morph, interactor) do
     ast = quote do
@@ -30,6 +30,14 @@ defmodule Interactor do
     fanouts = Enum.filter(neurons, fn x -> x.index == 1 end)
     fanout_ids = Enum.map(fanouts, fn x -> x.id end)
     %{sensor | fanout_ids: fanout_ids}
+  end
+
+  def run(interactor, genotype) do
+    receive do
+      {:ok, {self, message}} -> send self, {:ok, message}
+      {:terminate} -> IO.puts "exiting interactor"
+                      Process.exit(self(), :normal)
+    end
   end
 end
 

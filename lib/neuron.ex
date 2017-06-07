@@ -87,7 +87,7 @@ defmodule Neuron do
     end
   end
 
-  def run(neurons) do
+  def run(neuron, neurons) do
     receive do
       {:ok, {self, message}} -> send self, {:ok, message}
       {:terminate} -> IO.puts "exiting neuron"
