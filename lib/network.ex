@@ -18,12 +18,12 @@ defmodule Network do
   default creation - calls Network.create(:ffnn, :xor, :medium)
   """
   def create do
-    create(:ffnn, :xor, :medium)
+    create(:ffnn, :rng, :medium)
   end
 
   def create(type, scape, size) do
     if is_atom(scape) do
-    [cortex] = Cortex.generate(scape, type)
+    [c] = Cortex.generate(scape, type)
     table = :ets.new(:table, [:set, :private])
     n= Neuron.generate(size)
     s= Interactor.generate(scape, :sensor)
@@ -31,13 +31,13 @@ defmodule Network do
     a= Interactor.generate(scape, :actuator)
       |> Enum.map(fn x -> Interactor.fanin_neurons(x, n) end)
     n1 = Neuron.assign_inputs_and_outputs(n, s, a)
-    n2 = Enum.map(n1, fn x -> %{x | cx_id: cortex.id} end)
-    s2 = Enum.map(s, fn x -> %{x | cx_id: cortex.id} end)
-    a2 = Enum.map(a, fn x -> %{x | cx_id: cortex.id} end)
-    genotype = [n2, s2, a2, [cortex]]  
+    n2 = Enum.map(n1, fn x -> %{x | cx_id: c.id} end)
+    s2 = Enum.map(s, fn x -> %{x | cx_id: c.id} end)
+    a2 = Enum.map(a, fn x -> %{x | cx_id: c.id} end)
+    genotype = [n2, s2, a2, [c]]  
     gen_pids(genotype, table)
     [neurons, sensors, actuators]= for x <- [n2, s2, a2], do: Enum.map(x, fn y -> %{y | pid: :ets.lookup_element(table, y.id, 2)} end) 
-#   Agent.start_link fn -> geno_pids end
+    cortex = %{c | pid: spawn(Cortex, :run, [[neurons, sensors, actuators], table])}
     [neurons, sensors, actuators, [cortex]]
     else
       IO.puts "Error: scape must be an atom, ie :rng"

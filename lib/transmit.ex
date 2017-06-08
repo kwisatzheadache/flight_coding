@@ -20,7 +20,11 @@ defmodule Transmit do
   @doc"""
   Transmit message to all pids
   """
-  def all(genotype) do
+  def all(genotype, message) do
     Enum.each(List.flatten(genotype), fn x -> send x.pid, {:terminate, "terminating"} end)
+  end
+
+  def neurons(output_neurons, message) do
+    for x <- output_neurons, do: send x, {message}
   end
 end
