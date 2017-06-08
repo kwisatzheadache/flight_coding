@@ -88,14 +88,21 @@ defmodule Neuron do
   end
 
   def run(neuron, table) do
-    output_pids = Enum.map(neuron.output_neurons, fn x -> :ets.lookup_element(table, x, 2) end)
+    # output_pids = Enum.map(neuron.output_neurons, fn x -> :ets.lookup_element(table, x, 2) end)
+    acc = []
     receive do
       {:ok, {self, message}} -> send self, {:ok, message}
       {:terminate} -> IO.puts "exiting neuron"
                       Process.exit(self(), :normal)
-      {:fire, input_vector} -> 
-          for x <- output_pids, do: send x, {:input_vector, af(input_vector)}
+      {:fire, input_vector} -> IO.puts "neuron received :fire message"
+    #     for x <- output_pids, do: send x, {:input_vector, neuron.id, af(input_vector)}
+      {:input_vector, incoming_neuron, input} -> acc = [{incoming_neuron, input} | acc]
+          IO.puts "received input vector message"
     end
+  end
+
+  def af(input_vector) do
+    [1]
   end
 end
 
