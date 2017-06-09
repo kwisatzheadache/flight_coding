@@ -30,7 +30,7 @@ defmodule Network do
       |> Enum.map(fn x -> Interactor.fanout_neurons(x, n) end)
     a= Interactor.generate(scape, :actuator)
       |> Enum.map(fn x -> Interactor.fanin_neurons(x, n) end)
-    n1 = Neuron.assign_inputs_and_outputs(n, s, a)
+    n1 = Neuron.assign_inputs_outputs_and_weights(n, s, a)
     n2 = Enum.map(n1, fn x -> %{x | cx_id: c.id} end)
     s2 = Enum.map(s, fn x -> %{x | cx_id: c.id} end)
     a2 = Enum.map(a, fn x -> %{x | cx_id: c.id} end)
@@ -67,7 +67,7 @@ defmodule Network do
     case head.id do
       {:actuator, id} -> Enum.map(list, fn x -> {x.id, spawn(Interactor, :run, [:actuator, genotype])} end)
       {:sensor, id}   -> Enum.map(list, fn x -> {x.id, spawn(Interactor, :run, [:sensor, genotype])} end)
-      {:neuron, id}   -> Enum.map(list, fn x -> {x.id, spawn(Neuron, :run, [x, genotype])} end)
+      {:neuron, id}   -> Enum.map(list, fn x -> {x.id, spawn(Neuron, :run, [x, []])} end)
     end
   end
 end

@@ -37,9 +37,9 @@ defmodule Interactor do
   Actuators are waiting for the :act / :terminate signal.
 
   :start initiates transmission to the first layer neurons. The Sensors send the following message
-  {genotype, input_vector}
+  {:fire, input_vector}
 
-  In the case of scape :rng, that message looks approx like this: {genotype, [0.49349, 0.492352]}
+  In the case of scape :rng, that message looks approx like this: {:fire, [0.49349, 0.492352]}
   """
   def run(interactor, genotype) do
     receive do

@@ -53,10 +53,11 @@ defmodule Neuron do
   Receives the list of neurons and interactors. Reads the index values and assigns
   input and output neurons, such that each neuron feeds forward.
   """
-  def assign_inputs_and_outputs(neurons, sensors, actuators) do
+  def assign_inputs_outputs_and_weights(neurons, sensors, actuators) do
     Enum.map(neurons, fn x ->  %{x | input_neurons: input_neurons(neurons, sensors, x.index),
                                      output_neurons: output_neurons(neurons, actuators, x.index)
                                 } end)
+    |> Enum.map(fn x -> %{x | weights: Weights.generate(length(x.input_neurons) + 1, [])} end)
   end
 
   @doc"""
@@ -87,22 +88,45 @@ defmodule Neuron do
     end
   end
 
-  def run(neuron, table) do
+  def run(neuron, inputs, table) do
     # output_pids = Enum.map(neuron.output_neurons, fn x -> :ets.lookup_element(table, x, 2) end)
     acc = []
+    input_table = case is_integer(table) do
+                    true -> table
+                    false -> :ets.new(:input_table, [:set, :private])
+                  end
     receive do
       {:ok, {self, message}} -> send self, {:ok, message}
       {:terminate} -> IO.puts "exiting neuron"
                       Process.exit(self(), :normal)
       {:fire, input_vector} -> IO.puts "neuron received :fire message"
     #     for x <- output_pids, do: send x, {:input_vector, neuron.id, af(input_vector)}
-      {:input_vector, incoming_neuron, input} -> acc = [{incoming_neuron, input} | acc]
-          IO.puts "received input vector message"
+      {:input_vector, incoming_neuron, input} -> 
+          :ets.insert(input_table, {incoming_neuron, input})
+            case :ets.info(input_table, :size) == length(neuron.input_neurons) do
+              true -> af(Enum.map(neuron.input_neurons, fn x -> :ets.lookup_element(input_table, x, 2) end), neuron.weights)
+                |> IO.inspect(label: "neuron output")
+                IO.puts "something is right"
+              false -> IO.puts "something wrong in neuron stuff"
+              IO.puts :ets.info(input_table, :size)
+              IO.puts :ets.i(input_table)
+              run(neuron, inputs, input_table)
+            end
     end
   end
 
-  def af(input_vector) do
-    [1]
+  def af(input_vector, weights) do
+    dot = dot(input_vector, weights, [], 0)
+    :math.tanh(dot)
+  end
+
+  def dot(matrix1, matrix2, acc, counter) do
+    if counter < length(matrix1) do
+      sum = Enum.at(matrix1, counter) * Enum.at(matrix2, counter)
+      dot(matrix1, matrix2, [sum | acc], counter + 1)
+    else
+      Enum.sum(acc)
+    end
   end
 end
 
