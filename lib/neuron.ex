@@ -99,18 +99,13 @@ defmodule Neuron do
       {:ok, {self, message}} -> send self, {:ok, message}
       {:terminate} -> IO.puts "exiting neuron"
                       Process.exit(self(), :normal)
-      {:fire, input_vector} -> IO.puts "neuron received :fire message"
+      {:fire, input_vector} -> 
     #     for x <- output_pids, do: send x, {:input_vector, neuron.id, af(input_vector)}
       {:input_vector, incoming_neuron, input} -> 
           :ets.insert(input_table, {incoming_neuron, input})
             case :ets.info(input_table, :size) == length(neuron.input_neurons) do
-              true -> af(Enum.map(neuron.input_neurons, fn x -> :ets.lookup_element(input_table, x, 2) end), neuron.weights)
-                |> IO.inspect(label: "neuron output")
-                IO.puts "something is right"
-              false -> IO.puts "something wrong in neuron stuff"
-              IO.puts :ets.info(input_table, :size)
-              IO.puts :ets.i(input_table)
-              run(neuron, inputs, input_table)
+              true  -> af(Enum.map(neuron.input_neurons, fn x -> :ets.lookup_element(input_table, x, 2) end), neuron.weights)
+              false -> run(neuron, inputs, input_table)
             end
     end
   end
