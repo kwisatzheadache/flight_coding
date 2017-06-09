@@ -17,6 +17,8 @@ rather than passing it in each function call.
 
 6/9
 Neuron is processing stuff. Cool
+
+edit: wait, it's throwing an error now...
 ```elixir
 geno = Network.create
 [neurons, sensors, actuators, [cortex]] = geno
