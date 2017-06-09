@@ -14,6 +14,16 @@ Furthermore, the genotype is automatically started in a process so that it can b
 rather than passing it in each function call.
 
 6/7 - All nodes spawned and assigned pids. yay.
+
+6/9
+Neuron is processing stuff. Cool
+```elixir
+geno = Network.create
+[neurons, sensors, actuators, [cortex]] = geno
+neuron4 = Enum.at(neurons, 3)
+pid = spawn(Neuron, :run, [neuron4, neuron4.input_neurons, []])
+Enum.map(neuron4.input_neurons, fn x -> send pid, {:input_vector, x, :rand.uniform()} end))
+```
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed

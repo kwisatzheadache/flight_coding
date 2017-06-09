@@ -89,7 +89,6 @@ defmodule Neuron do
   end
 
   def run(neuron, inputs, table) do
-    # output_pids = Enum.map(neuron.output_neurons, fn x -> :ets.lookup_element(table, x, 2) end)
     acc = []
     input_table = case is_integer(table) do
                     true -> table
@@ -104,7 +103,7 @@ defmodule Neuron do
       {:input_vector, incoming_neuron, input} -> 
           :ets.insert(input_table, {incoming_neuron, input})
             case :ets.info(input_table, :size) == length(neuron.input_neurons) do
-              true  -> af(Enum.map(neuron.input_neurons, fn x -> :ets.lookup_element(input_table, x, 2) end), neuron.weights)
+              true  -> Transmit.neurons(neuron.output_neurons, {:input_vector, neuron.id, af(Enum.map(neuron.input_neurons, fn x -> :ets.lookup_element(input_table, x, 2) end), neuron.weights))
               false -> run(neuron, inputs, input_table)
             end
     end
