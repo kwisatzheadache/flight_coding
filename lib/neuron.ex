@@ -4,7 +4,7 @@ defmodule Neuron do
   Neurons have the format {{:neuron, .37374628}, {weights}}
   """
 
-  defstruct cx_id: nil, id: nil, pid: nil, af: :tanh, input_neurons: [], output_neurons: [], index: nil, weights: nil
+  defstruct cx_id: nil, id: nil, pid: nil, af: :tanh, input_neurons: [], output_neurons: [], output_pids: nil, index: nil, weights: nil
 
   @doc"""
   Creates neurons corresponding to the size of nn desired. 
@@ -88,7 +88,7 @@ defmodule Neuron do
     end
   end
 
-  def run(neuron, inputs, table) do
+  def run(neuron, table) do
     acc = []
     input_table = case is_integer(table) do
                     true -> table
@@ -102,9 +102,16 @@ defmodule Neuron do
     #     for x <- output_pids, do: send x, {:input_vector, neuron.id, af(input_vector)}
       {:input_vector, incoming_neuron, input} -> 
           :ets.insert(input_table, {incoming_neuron, input})
+            IO.inspect input_table, label: 'input table'
             case :ets.info(input_table, :size) == length(neuron.input_neurons) do
-              true  -> Transmit.neurons(neuron.output_neurons, {:input_vector, neuron.id, af(Enum.map(neuron.input_neurons, fn x -> :ets.lookup_element(input_table, x, 2) end), neuron.weights)})
-              false -> run(neuron, inputs, input_table)
+              true  -> IO.inspect neuron.input_neurons, label: "input_neurons"
+              IO.inspect neuron.output_pids, label: 'output_pids'
+                # Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(Enum.map(neuron.input_neurons, fn x -> :ets.lookup_element(input_table, x, 2) end), neuron.weights)})
+                # |> IO.inspect(label: 'neurons output')
+              false -> IO.puts "something not right"
+                IO.inspect({incoming_neuron, input}, label: "incoming_neuron and input")
+                run(neuron, input_table)
+              nil -> IO.puts "how am I getting a :nil response?"
             end
     end
   end

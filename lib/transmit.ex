@@ -24,7 +24,8 @@ defmodule Transmit do
     Enum.each(List.flatten(genotype), fn x -> send x.pid, {:terminate, "terminating"} end)
   end
 
-  def neurons(output_neurons, message) do
-    for x <- output_neurons, do: send x, {message}
+  def neurons(output_pids, message) do
+    Enum.map(output_pids, fn x -> send x, message end)
+#   for x <- output_pids, do: send x, {message}
   end
 end

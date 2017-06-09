@@ -25,22 +25,33 @@ defmodule Network do
     if is_atom(scape) do
     [c] = Cortex.generate(scape, type)
     table = :ets.new(:table, [:set, :private])
-    n= Neuron.generate(size)
+    n= Neuron.generate(size) #Empty neurons
     s= Interactor.generate(scape, :sensor)
       |> Enum.map(fn x -> Interactor.fanout_neurons(x, n) end)
     a= Interactor.generate(scape, :actuator)
       |> Enum.map(fn x -> Interactor.fanin_neurons(x, n) end)
-    n1 = Neuron.assign_inputs_outputs_and_weights(n, s, a)
-    n2 = Enum.map(n1, fn x -> %{x | cx_id: c.id} end)
-    s2 = Enum.map(s, fn x -> %{x | cx_id: c.id} end)
-    a2 = Enum.map(a, fn x -> %{x | cx_id: c.id} end)
+    n1 = Neuron.assign_inputs_outputs_and_weights(n, s, a) # Neurons assigned input_neurons, output_neurons, and weights
+    n2 = Enum.map(n1, fn x -> %{x | cx_id: c.id} end) # Neurons given cx_id
+    s2 = Enum.map(s, fn x -> %{x | cx_id: c.id} end) # Sensors given cx_id
+    a2 = Enum.map(a, fn x -> %{x | cx_id: c.id} end) # Actuators given cx_id
     genotype = [n2, s2, a2, [c]]  
-    gen_pids(genotype, table)
-    [neurons, sensors, actuators]= for x <- [n2, s2, a2], do: Enum.map(x, fn y -> %{y | pid: :ets.lookup_element(table, y.id, 2)} end) 
+    gen_pids(genotype, table) # Neurons, sensors, actuators spawned, pids send to :ets table. Fetched in the next line
+    [n3, s3, actuators] = for x <- [n2, s2, a2], do: Enum.map(x, fn y -> %{y | pid: :ets.lookup_element(table, y.id, 2)} end) 
+
+    neurons = Enum.map(n3, fn x -> assign_output_pids(x, table) end)
+    sensors = Enum.map(s3, fn x -> assign_output_pids(x, table) end)
+
     cortex = %{c | pid: spawn(Cortex, :run, [[neurons, sensors, actuators], table])}
     [neurons, sensors, actuators, [cortex]]
     else
       IO.puts "Error: scape must be an atom, ie :rng"
+    end
+  end
+
+  def assign_output_pids(unit, table) do
+    case unit.id do
+      {:neuron, _} -> %{unit | output_pids: Enum.map(unit.output_neurons, fn x -> :ets.lookup_element(table, x, 2) end)}
+      {:sensor, _} -> %{unit | output_pids: Enum.map(unit.fanout_ids, fn x -> :ets.lookup_element(table, x, 2) end)}
     end
   end
 

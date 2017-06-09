@@ -1,0 +1,4 @@
+geno = Network.create
+[neurons, sensors, actuators, [cortex]] = geno
+neuronx = Enum.at(neurons, 3)
+Enum.map(neuronx.input_neurons, fn x -> send neuronx.pid, {:input_vector, x, :rand.uniform()} end)

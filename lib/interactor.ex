@@ -4,7 +4,7 @@ defmodule Interactor do
   We'll use a macro to call the module from the Sensor type.
   """
 
-  defstruct id: nil, pid: nil, cx_id: nil, name: nil, scape: nil, vl: nil, fanout_ids: "no fanouts for actuator", fanin_ids: "no fanins for sensor", index: nil
+  defstruct id: nil, pid: nil, cx_id: nil, name: nil, scape: nil, vl: nil, fanout_ids: "no fanouts for actuator", output_pids: nil, fanin_ids: "no fanins for sensor", index: nil
 
   defmacro type(morph, interactor) do
     ast = quote do
