@@ -95,6 +95,8 @@ defmodule Neuron do
                     false -> :ets.new(:input_table, [:set, :private])
                   end
     receive do
+      {:update_pid, pids} -> %{neuron | output_pids: pids}
+                      |> run(input_table)
       {:ok, {self, message}} -> send self, {:ok, message}
       {:terminate} -> IO.puts "exiting neuron"
                       Process.exit(self(), :normal)
@@ -102,16 +104,12 @@ defmodule Neuron do
     #     for x <- output_pids, do: send x, {:input_vector, neuron.id, af(input_vector)}
       {:input_vector, incoming_neuron, input} -> 
           :ets.insert(input_table, {incoming_neuron, input})
-            IO.inspect input_table, label: 'input table'
             case :ets.info(input_table, :size) == length(neuron.input_neurons) do
-              true  -> IO.inspect neuron.input_neurons, label: "input_neurons"
-              IO.inspect neuron.output_pids, label: 'output_pids'
-                # Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(Enum.map(neuron.input_neurons, fn x -> :ets.lookup_element(input_table, x, 2) end), neuron.weights)})
-                # |> IO.inspect(label: 'neurons output')
-              false -> IO.puts "something not right"
-                IO.inspect({incoming_neuron, input}, label: "incoming_neuron and input")
+              true  -> Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(Enum.map(neuron.input_neurons, fn x -> :ets.lookup_element(input_table, x, 2) end), neuron.weights)})
+                |> IO.inspect(label: "message sent to output neurons")
+                IO.puts"neuron transmitting"
                 run(neuron, input_table)
-              nil -> IO.puts "how am I getting a :nil response?"
+              false -> run(neuron, input_table)
             end
     end
   end

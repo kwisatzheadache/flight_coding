@@ -40,7 +40,8 @@ defmodule Network do
 
     neurons = Enum.map(n3, fn x -> assign_output_pids(x, table) end)
     sensors = Enum.map(s3, fn x -> assign_output_pids(x, table) end)
-
+    Enum.each(neurons, fn x -> send x.pid, {:update_pid, x.output_pids} end)
+    Enum.each(sensors, fn x -> send x.pid, {:update_pid, x.output_pids} end)
     cortex = %{c | pid: spawn(Cortex, :run, [[neurons, sensors, actuators], table])}
     [neurons, sensors, actuators, [cortex]]
     else
