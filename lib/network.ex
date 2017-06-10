@@ -37,7 +37,6 @@ defmodule Network do
     genotype = [n2, s2, a2, [c]]  
     gen_pids(genotype, table) # Neurons, sensors, actuators spawned, pids send to :ets table. Fetched in the next line
     [n3, s3, actuators] = for x <- [n2, s2, a2], do: Enum.map(x, fn y -> %{y | pid: :ets.lookup_element(table, y.id, 2)} end) 
-
     neurons = Enum.map(n3, fn x -> assign_output_pids(x, table) end)
     sensors = Enum.map(s3, fn x -> assign_output_pids(x, table) end)
     Enum.each(neurons, fn x -> send x.pid, {:update_pid, x.output_pids} end)

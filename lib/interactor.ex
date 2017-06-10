@@ -43,7 +43,7 @@ defmodule Interactor do
   """
   def run(interactor, genotype) do
     receive do
-      {:start, _} -> Transmit.list(:neurons, genotype, {:fire, Scape.generate_input(genotype)})
+      {:start, _} -> Transmit.list(:neurons, genotype, {:fire, Scape.generate_input(interactor.scape)})
       {:ok, {self, message}} -> send self, {:ok, message}
       {:terminate} -> IO.puts "exiting interactor"
                       Process.exit(self(), :normal)

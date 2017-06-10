@@ -100,7 +100,7 @@ defmodule Neuron do
       {:ok, {self, message}} -> send self, {:ok, message}
       {:terminate} -> IO.puts "exiting neuron"
                       Process.exit(self(), :normal)
-      {:fire, input_vector} -> nil
+    # {:fire, input_vector} -> Transmit.neurons(neuron.output_pids, )
     #     for x <- output_pids, do: send x, {:input_vector, neuron.id, af(input_vector)}
       {:input_vector, incoming_neuron, input} -> 
           :ets.insert(input_table, {incoming_neuron, input})

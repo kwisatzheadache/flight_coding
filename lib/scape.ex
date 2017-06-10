@@ -10,10 +10,9 @@ defmodule Scape do
 
   @doc"""
   """
-  def generate_input(genotype) do
-    [scape] = Enum.at(genotype, 1)
-         |> Enum.map(fn x -> x.scape end)
-    Code.eval_quoted(scape_to_call(scape, :input))
+  def generate_input(scape) do
+    {[input_1, input_2], []} = Code.eval_quoted(scape_to_call(scape, :input))
+    [input_1, input_2]
   end
 
   def cube(call) do
