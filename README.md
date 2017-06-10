@@ -18,7 +18,6 @@ rather than passing it in each function call.
 6/9
 Neuron is processing stuff. Cool
 
-edit: wait, it's throwing an error now...
 ```elixir
 geno = Network.create
 [neurons, sensors, actuators, [cortex]] = geno
@@ -26,6 +25,14 @@ neuron4 = Enum.at(neurons, 3)
 pid = spawn(Neuron, :run, [neuron4, neuron4.input_neurons, []])
 Enum.map(neuron4.input_neurons, fn x -> send pid, {:input_vector, x, :rand.uniform()} end))
 ```
+
+edit: wait, it's throwing an error now...
+
+So, the problem is that the output PID's aren't being set properly. The Neurons
+are spawned, assigned pids, but since the pids happen after the neuron is 
+started, the output pids aren't being updated in the struct...
+
+Guess I'll use :ets tables to get the PID's from :output_neurons.
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
