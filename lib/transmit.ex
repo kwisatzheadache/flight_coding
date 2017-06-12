@@ -11,9 +11,10 @@ defmodule Transmit do
     [neurons, sensors, actuators, _] = genotype
     first_layer_neurons = Enum.filter(neurons, fn x -> x.index == 1 end)
     case component do
-      :sensors -> Enum.each(first_layer_neurons, fn x -> send x.pid, {message} end)
-      :neurons -> Enum.each(sensors, fn x -> send x.pid, {message} end)
-      :actuators -> Enum.each(actuators, fn x -> send x.pid, {message} end)
+      :neurons -> Enum.each(first_layer_neurons, fn x -> send x.pid, message end)
+      :all_neurons -> Enum.each(neurons, fn x -> send x.pid, message end)
+      :sensors -> Enum.each(sensors, fn x -> send x.pid, message end)
+      :actuators -> Enum.each(actuators, fn x -> send x.pid, message end)
     end
   end
 

@@ -18,10 +18,13 @@ defmodule Cortex do
   """
   def run(genotype, table) do
     receive do
-      {:start, _} -> Transmit.list(:sensors, genotype, :start)
+      {:start, _} -> Transmit.list(:sensors, genotype, {:start, 'blank'})
       {:terminate, _} -> Transmit.all(genotype, :terminate)
                          IO.puts "terminating cortex"
                          Process.exit(self(), :normal)
+      {:test, message} -> Transmit.list(:sensors, genotype, message)
+      {:geno, message} -> IO.inspect genotype, label: 'cortex running genotype'
     end
+    run(genotype, table)
   end
 end

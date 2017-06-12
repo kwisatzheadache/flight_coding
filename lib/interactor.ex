@@ -41,12 +41,22 @@ defmodule Interactor do
 
   In the case of scape :rng, that message looks approx like this: {:fire, [0.49349, 0.492352]}
   """
-  def run(interactor, genotype) do
+  def run(interactor, genotype, sensor) do
+    [n, s, a, c] = genotype
+    scape = (Enum.at(s, 0)).scape
+    input = Scape.generate_input(scape)
     receive do
-      {:start, _} -> Transmit.list(:neurons, genotype, {:fire, Scape.generate_input(interactor.scape)})
-      {:ok, {self, message}} -> send self, {:ok, message}
+      {:update_pid, sensor} -> run(interactor, genotype, sensor)
+      {:start, _} -> Enum.each((Enum.at(sensor, 0)).output_pids, fn x -> send x, {:fire, input} end)
+      {:message, message} -> IO.puts message
+      {:input_vector, incoming_neuron, input} -> input
+        |> IO.inspect(label: 'Output from actuator')
       {:terminate} -> IO.puts "exiting interactor"
                       Process.exit(self(), :normal)
+      {:test, _} -> IO.puts "sensor receiving test signal"
+                      run(interactor, genotype, sensor)
+      {:print_self, _} -> IO.inspect sensor
+                      run(interactor, genotype, sensor)
     end
   end
 end

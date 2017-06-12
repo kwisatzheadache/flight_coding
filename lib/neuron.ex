@@ -100,8 +100,7 @@ defmodule Neuron do
       {:ok, {self, message}} -> send self, {:ok, message}
       {:terminate} -> IO.puts "exiting neuron"
                       Process.exit(self(), :normal)
-    # {:fire, input_vector} -> Transmit.neurons(neuron.output_pids, )
-    #     for x <- output_pids, do: send x, {:input_vector, neuron.id, af(input_vector)}
+      {:fire, input_vector} -> Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(input_vector, neuron.weights)})
       {:input_vector, incoming_neuron, input} -> 
           :ets.insert(input_table, {incoming_neuron, input})
             case :ets.info(input_table, :size) == length(neuron.input_neurons) do
@@ -111,6 +110,8 @@ defmodule Neuron do
                 run(neuron, input_table)
               false -> run(neuron, input_table)
             end
+      {:test, _} -> IO.puts "neuron receiving test signal"
+                      run(neuron, input_table)
     end
   end
 

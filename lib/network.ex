@@ -40,8 +40,8 @@ defmodule Network do
     neurons = Enum.map(n3, fn x -> assign_output_pids(x, table) end)
     sensors = Enum.map(s3, fn x -> assign_output_pids(x, table) end)
     Enum.each(neurons, fn x -> send x.pid, {:update_pid, x.output_pids} end)
-    Enum.each(sensors, fn x -> send x.pid, {:update_pid, x.output_pids} end)
-    cortex = %{c | pid: spawn(Cortex, :run, [[neurons, sensors, actuators], table])}
+    Enum.each(sensors, fn x -> send x.pid, {:update_pid, sensors} end)
+    cortex = %{c | pid: spawn(Cortex, :run, [[neurons, sensors, actuators, c], table])}
     [neurons, sensors, actuators, [cortex]]
     else
       IO.puts "Error: scape must be an atom, ie :rng"
@@ -76,8 +76,8 @@ defmodule Network do
   def set_pids(list, genotype) do
     [head | tail] = list
     case head.id do
-      {:actuator, id} -> Enum.map(list, fn x -> {x.id, spawn(Interactor, :run, [:actuator, genotype])} end)
-      {:sensor, id}   -> Enum.map(list, fn x -> {x.id, spawn(Interactor, :run, [:sensor, genotype])} end)
+      {:actuator, id} -> Enum.map(list, fn x -> {x.id, spawn(Interactor, :run, [:actuator, genotype, []])} end)
+      {:sensor, id}   -> Enum.map(list, fn x -> {x.id, spawn(Interactor, :run, [:sensor, genotype, []])} end)
       {:neuron, id}   -> Enum.map(list, fn x -> {x.id, spawn(Neuron, :run, [x, []])} end)
     end
   end
