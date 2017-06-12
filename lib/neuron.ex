@@ -105,8 +105,6 @@ defmodule Neuron do
           :ets.insert(input_table, {incoming_neuron, input})
             case :ets.info(input_table, :size) == length(neuron.input_neurons) do
               true  -> Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(Enum.map(neuron.input_neurons, fn x -> :ets.lookup_element(input_table, x, 2) end), neuron.weights)})
-                |> IO.inspect(label: "message sent to output neurons")
-                IO.puts"neuron transmitting"
                 run(neuron, input_table)
               false -> run(neuron, input_table)
             end

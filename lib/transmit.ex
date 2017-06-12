@@ -27,6 +27,5 @@ defmodule Transmit do
 
   def neurons(output_pids, message) do
     Enum.map(output_pids, fn x -> send x, message end)
-#   for x <- output_pids, do: send x, {message}
   end
 end

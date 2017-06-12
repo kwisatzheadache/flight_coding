@@ -43,6 +43,7 @@ defmodule Network do
     Enum.each(sensors, fn x -> send x.pid, {:update_pid, sensors} end)
     cortex = %{c | pid: spawn(Cortex, :run, [[neurons, sensors, actuators, c], table])}
     [neurons, sensors, actuators, [cortex]]
+    send cortex.pid, {:start, 4}
     else
       IO.puts "Error: scape must be an atom, ie :rng"
     end

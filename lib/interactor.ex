@@ -48,15 +48,11 @@ defmodule Interactor do
     receive do
       {:update_pid, sensor} -> run(interactor, genotype, sensor)
       {:start, _} -> Enum.each((Enum.at(sensor, 0)).output_pids, fn x -> send x, {:fire, input} end)
-      {:message, message} -> IO.puts message
       {:input_vector, incoming_neuron, input} -> input
         |> IO.inspect(label: 'Output from actuator')
+        run(interactor, genotype, sensor)
       {:terminate} -> IO.puts "exiting interactor"
                       Process.exit(self(), :normal)
-      {:test, _} -> IO.puts "sensor receiving test signal"
-                      run(interactor, genotype, sensor)
-      {:print_self, _} -> IO.inspect sensor
-                      run(interactor, genotype, sensor)
     end
   end
 end
