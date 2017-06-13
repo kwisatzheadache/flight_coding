@@ -17,11 +17,7 @@ rather than passing it in each function call.
 Neuron is processing stuff. Cool
 
 ```elixir
-geno = Network.create
-[neurons, sensors, actuators, [cortex]] = geno
-neuron4 = Enum.at(neurons, 3)
-pid = spawn(Neuron, :run, [neuron4, neuron4.input_neurons, []])
-Enum.map(neuron4.input_neurons, fn x -> send pid, {:input_vector, x, :rand.uniform()} end))
+Network.create
 ```
 
 ## Installation
