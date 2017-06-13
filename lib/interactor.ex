@@ -42,7 +42,7 @@ defmodule Interactor do
   In the case of scape :rng, that message looks approx like this: {:fire, [0.49349, 0.492352]}
   """
   def run(interactor, genotype, sensor, acc) do
-    [n, s, a, [c]] = genotype
+    [n, s, a, c] = genotype
     scape = (Enum.at(s, 0)).scape
     input = Scape.generate_input(scape)
     receive do
