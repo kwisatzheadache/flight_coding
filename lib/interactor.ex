@@ -42,19 +42,22 @@ defmodule Interactor do
   In the case of scape :rng, that message looks approx like this: {:fire, [0.49349, 0.492352]}
   """
   def run(interactor, genotype, sensor, acc) do
-    [n, s, a, c] = genotype
-    scape = (Enum.at(s, 0)).scape
+    [n, s, a, [c]] = genotype
+    scape = c.scape
+    IO.inspect scape
     input = Scape.generate_input(scape)
+    # {_, input} = Scape.generate_input(scape)
+    IO.inspect input, label: 'input from interactor module'
     receive do
-      {:update_pid, sensor} -> run(interactor, genotype, sensor, [])
+      {:update_pid, update_sensor} -> run(interactor, genotype, update_sensor, [])
       {:start, cortex_pid} -> Enum.each((Enum.at(sensor, 0)).output_pids, fn x -> send x, {:fire, input} end)
                     send cortex_pid, {:sensor_input, {scape, input}} 
                           # I really should have updated the cx_pid in a better manner. I just sent it in the :update_pid message and assigned it to the acc variable temporarily.
-      {:input_vector, incoming_neuron, input} -> case length([input | acc]) == length(Enum.at(a, 0).fanin_ids) do
-                                                   true -> Enum.sum([input | acc])
-                                                           |> IO.inspect(label: 'output from nn')
-                                                   false -> run(interactor, genotype, sensor, [input | acc])
-                                                 end
+      # {:input_vector, incoming_neuron, input} -> case length([input | acc]) == length(Enum.at(a, 0).fanin_ids) do
+      #                                              true -> Enum.sum([input | acc])
+      #                                                      |> IO.inspect(label: 'output from nn')
+      #                                              false -> run(interactor, genotype, sensor, [input | acc])
+      #                                            end
       {:terminate} -> IO.puts "exiting interactor"
                       Process.exit(self(), :normal)
     end

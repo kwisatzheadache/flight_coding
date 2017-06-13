@@ -12,7 +12,7 @@ defmodule Scape do
   @doc"""
   """
   def generate_input(scape) do
-    {{scape_name, input}, []} = scape_to_call(scape, :input)
+    {input, []} = scape_to_call(scape, :input)
                                |> Code.eval_quoted
     input
   end
