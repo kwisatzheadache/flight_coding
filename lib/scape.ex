@@ -17,6 +17,10 @@ defmodule Scape do
     input
   end
 
+  def test do
+    generate_input(:xor)
+  end
+
   def cube(call) do
     case call do
       :input -> [1,2,3]
@@ -55,9 +59,10 @@ defmodule Scape do
   end
 
   def get_output(scape, input) do
-    case scape do
-      :xor -> xor_output(input)
-      _ -> IO.puts "error message from scape.ex line 51"
-    end
+    xor_output(input)
+    # case scape do
+    #   :xor -> xor_output(input)
+    #   _ -> IO.puts "error message from scape.ex line 51"
+    # end
   end
 end

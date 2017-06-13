@@ -18,7 +18,7 @@ defmodule Network do
   default creation - calls Network.create(:ffnn, :xor, :medium)
   """
   def create do
-    create(:ffnn, :rng, :medium)
+    create(:ffnn, :xor, :medium)
   end
 
   def create(type, scape, size) do

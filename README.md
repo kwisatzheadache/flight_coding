@@ -17,6 +17,9 @@ rather than passing it in each function call.
 Ran into a very strange issue with the Scape.generate_input(scape) function.
 It seems to have resolved, not entirely sure how or what I did.
 
+At any rate, it all seems to work better now. `Network.create` generates a NN,
+runs the `:xor` scape and outputs a number. Now to begin the training process.
+
 ```elixir
 Network.create
 ```

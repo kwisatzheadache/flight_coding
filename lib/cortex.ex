@@ -19,9 +19,9 @@ defmodule Cortex do
   def run(genotype, table, generated_input, correct_output) do
     [n, s, a, c] = genotype
     receive do
-      {:start, _} -> Transmit.list(:sensors, genotype, {:start, c.pid})
+      {:start, _} -> Transmit.list(:sensors, genotype, {:start, self()})
         run(genotype, table, [], [])
-      {:sensor_input, input} -> run(genotype, table, input, Scape.get_output(c.scape, input))
+      {:sensor_input, {scape, input}} -> run(genotype, table, input, Scape.get_output(c.scape, input))
       {:actuator_output, output} -> finish(genotype, generated_input, output, correct_output)
                          # Transmit.all(genotype, :terminate)
                          # IO.puts "terminating cortex"
