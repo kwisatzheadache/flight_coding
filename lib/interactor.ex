@@ -42,12 +42,14 @@ defmodule Interactor do
   In the case of scape :rng, that message looks approx like this: {:fire, [0.49349, 0.492352]}
   """
   def run(interactor, genotype, sensor, acc) do
-    [n, s, a, c] = genotype
+    [n, s, a, [c]] = genotype
     scape = (Enum.at(s, 0)).scape
     input = Scape.generate_input(scape)
     receive do
       {:update_pid, sensor} -> run(interactor, genotype, sensor, [])
-      {:start, _} -> Enum.each((Enum.at(sensor, 0)).output_pids, fn x -> send x, {:fire, input} end)
+      {:start, cortex_pid} -> Enum.each((Enum.at(sensor, 0)).output_pids, fn x -> send x, {:fire, input} end)
+                    send cortex_pid, {:sensor_input, {scape, input}} 
+                          # I really should have updated the cx_pid in a better manner. I just sent it in the :update_pid message and assigned it to the acc variable temporarily.
       {:input_vector, incoming_neuron, input} -> case length([input | acc]) == length(Enum.at(a, 0).fanin_ids) do
                                                    true -> Enum.sum([input | acc])
                                                            |> IO.inspect(label: 'output from nn')

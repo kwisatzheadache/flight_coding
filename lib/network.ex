@@ -41,9 +41,10 @@ defmodule Network do
     sensors = Enum.map(s3, fn x -> assign_output_pids(x, table) end)
     Enum.each(neurons, fn x -> send x.pid, {:update_pid, x.output_pids} end)
     Enum.each(sensors, fn x -> send x.pid, {:update_pid, sensors} end)
-    cortex = %{c | pid: spawn(Cortex, :run, [[neurons, sensors, actuators, c], table])}
+    cortex = %{c | pid: spawn(Cortex, :run, [[neurons, sensors, actuators, c], table, [], []])}
     [neurons, sensors, actuators, [cortex]]
-    send cortex.pid, {:start, 4}
+    [input, correct_output] = Scape.generate_input(scape)
+    send cortex.pid, {:start, input}
     else
       IO.puts "Error: scape must be an atom, ie :rng"
     end
@@ -62,7 +63,7 @@ defmodule Network do
   def gen_pids(genotype, table) do
     [neurons, sensors, actuators, [cortex]] = genotype
     cx_id = cortex.id
-    cx_pid = spawn(Cortex, :run, [genotype, table])
+    cx_pid = spawn(Cortex, :run, [genotype, table, [], []])
     cx_tuple = {cx_id, cx_pid}
     n_list = set_pids(neurons, genotype)
     s_list = set_pids(sensors, genotype)
