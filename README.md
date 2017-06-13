@@ -13,8 +13,9 @@ It is fully functioning as a genotype generator.
 Furthermore, the genotype is automatically started in a process so that it can be accessed quickly, 
 rather than passing it in each function call.
 
-6/12
-Neuron is processing stuff. Cool
+6/13
+Ran into a very strange issue with the Scape.generate_input(scape) function.
+It seems to have resolved, not entirely sure how or what I did.
 
 ```elixir
 Network.create
