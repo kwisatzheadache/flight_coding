@@ -24,7 +24,6 @@ defmodule Network do
   def create(type, scape, size) do
     if is_atom(scape) do
     [c] = Cortex.generate(scape, type)
-    table = :ets.new(:table, [:set, :private])
     n= Neuron.generate(size) #Empty neurons
     s= Interactor.generate(scape, :sensor)
       |> Enum.map(fn x -> Interactor.fanout_neurons(x, n) end)
@@ -34,6 +33,7 @@ defmodule Network do
     n2 = Enum.map(n1, fn x -> %{x | cx_id: c.id} end) # Neurons given cx_id
     s2 = Enum.map(s, fn x -> %{x | cx_id: c.id} end) # Sensors given cx_id
     a2 = Enum.map(a, fn x -> %{x | cx_id: c.id} end) # Actuators given cx_id
+    table = :ets.new(:table, [:set, :private])
     genotype = [n2, s2, a2, [c]]  
     gen_pids(genotype, table) # Neurons, sensors, actuators spawned, pids send to :ets table. Fetched in the next line
     [n3, s3, actuators] = for x <- [n2, s2, a2], do: Enum.map(x, fn y -> %{y | pid: :ets.lookup_element(table, y.id, 2)} end) 
@@ -41,13 +41,17 @@ defmodule Network do
     sensors = Enum.map(s3, fn x -> assign_output_pids(x, table) end)
     Enum.each(neurons, fn x -> send x.pid, {:update_pid, x.output_pids} end)
     Enum.each(sensors, fn x -> send x.pid, {:update_pid, sensors} end)
-    cortex = %{c | pid: spawn(Cortex, :run, [[neurons, sensors, actuators, c], table, [], []])}
+    cortex = %{c | pid: spawn(Cortex, :run, [[neurons, sensors, actuators, c], table, [], [], self()])}
+    Enum.each(List.flatten([sensors, actuators]), fn x -> send x.pid, {:update_cortex_pid, cortex.pid} end)
     [neurons, sensors, actuators, [cortex]]
     input = Scape.generate_input(scape)
     IO.inspect input, label: "input from network module"
-    send cortex.pid, {:start, input}
+    send cortex.pid, {:start, self()}
     else
       IO.puts "Error: scape must be an atom, ie :rng"
+    end
+    receive do
+      {:completion_data, [input, [output], [correct_output]]} -> [input, output, correct_output]
     end
   end
 
@@ -63,13 +67,10 @@ defmodule Network do
   """
   def gen_pids(genotype, table) do
     [neurons, sensors, actuators, [cortex]] = genotype
-    cx_id = cortex.id
-    cx_pid = spawn(Cortex, :run, [genotype, table, [], []])
-    cx_tuple = {cx_id, cx_pid}
     n_list = set_pids(neurons, genotype)
     s_list = set_pids(sensors, genotype)
     a_list = set_pids(actuators, genotype)
-    full_list = List.flatten([n_list, s_list, a_list, cx_tuple])
+    full_list = List.flatten([n_list, s_list, a_list])
     Enum.each(full_list, fn x -> :ets.insert(table, x) end)
   end
 

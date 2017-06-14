@@ -16,23 +16,24 @@ defmodule Cortex do
   @doc"""
   Sends init message to sensors, upon receiving :start message
   """
-  def run(genotype, table, generated_input, correct_output) do
+  def run(genotype, table, generated_input, correct_output, self) do
     [n, s, a, c] = genotype
     receive do
-      {:start, _} -> Transmit.list(:sensors, genotype, {:start, self()})
-        run(genotype, table, [], [])
-      {:sensor_input, {scape, input}} -> run(genotype, table, input, Scape.get_output(c.scape, input))
-      {:actuator_output, output} -> finish(genotype, generated_input, output, correct_output)
-                         # Transmit.all(genotype, :terminate)
+      {:start, self_pid} -> Transmit.list(:sensors, genotype, {:start, self()})
+        run(genotype, table, [], [], self_pid)
+      {:sensor_input, {scape, input}} -> run(genotype, table, input, Scape.get_output(c.scape, input), self)
+      {:nn_output, output} -> finish(genotype, generated_input, [output], correct_output, self)
+                           Transmit.all(genotype, :terminate)
                          # IO.puts "terminating cortex"
                          # Process.exit(self(), :normal)
     end
   end
 
-  def finish(genotype, input, output, correct_output) do
-         IO.inspect genotype, label: "genotype"
-         IO.inspect input, label: "generated input"
-         IO.inspect output, label: "generated output"
-         IO.inspect correct_output, label: "expected output"
+  def finish(genotype, input, actual_output, correct_output, self) do
+    output = case actual_output <= 0 do
+              true -> -1
+              false -> 1
+            end
+    send self, {:completion_data, [input, output, correct_output]}
   end
 end

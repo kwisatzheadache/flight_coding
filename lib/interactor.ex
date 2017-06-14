@@ -4,7 +4,7 @@ defmodule Interactor do
   We'll use a macro to call the module from the Sensor type.
   """
 
-  defstruct id: nil, pid: nil, cx_id: nil, name: nil, scape: nil, vl: nil, fanout_ids: "no fanouts for actuator", output_pids: nil, fanin_ids: "no fanins for sensor", index: nil
+  defstruct id: nil, pid: nil, cx_id: nil, cortex_pid: nil, name: nil, scape: nil, vl: nil, fanout_ids: "no fanouts for actuator", output_pids: nil, fanin_ids: "no fanins for sensor", index: nil
 
   defmacro type(morph, interactor) do
     ast = quote do
@@ -49,12 +49,14 @@ defmodule Interactor do
     {_, actual_input} = input
     receive do
       {:update_pid, update_sensor} -> run(interactor, genotype, update_sensor, [])
+      {:update_cortex_pid, cortex_pid} -> run(interactor, [n, s, a, [%{c| pid: cortex_pid}]], sensor, acc)
       {:start, cortex_pid} -> Enum.each((Enum.at(sensor, 0)).output_pids, fn x -> send x, {:fire, actual_input} end)
                     send cortex_pid, {:sensor_input, {scape, actual_input}} 
                           # I really should have updated the cx_pid in a better manner. I just sent it in the :update_pid message and assigned it to the acc variable temporarily.
       {:input_vector, incoming_neuron, input} -> case length([input | acc]) == length(Enum.at(a, 0).fanin_ids) do
                                                    true -> Enum.sum([input | acc])
                                                            |> IO.inspect(label: 'output from nn')
+                                                           send c.pid, {:nn_output, Enum.sum([input | acc])}
                                                    false -> run(interactor, genotype, sensor, [input | acc])
                                                  end
       {:terminate} -> IO.puts "exiting interactor"
