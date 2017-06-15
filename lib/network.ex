@@ -36,18 +36,18 @@ defmodule Network do
     genotype
   end
 
-  def link(genotype) do
+  def link_and_update(genotype) do
     [neurons, sensors, actuators, [cortex]] = genotype
     table = :ets.new(:table, [:set, :private])
     gen_pids(genotype, table) # Neurons, sensors, actuators spawned, pids send to :ets table. Fetched in the next line
-    [neurons_plus, sensors_plus, actuators_plus] = for x <- [n2, s2, a2], do: Enum.map(x, fn y -> %{y | pid: :ets.lookup_element(table, y.id, 2)} end) 
-    neurons = Enum.map(n3, fn x -> assign_output_pids(x, table) end)
-    sensors = Enum.map(s3, fn x -> assign_output_pids(x, table) end)
-    Enum.each(neurons, fn x -> send x.pid, {:update_pid, x.output_pids} end)
-    Enum.each(sensors, fn x -> send x.pid, {:update_pid, sensors} end)
-    cortex = %{c | pid: spawn(Cortex, :run, [[neurons, sensors, actuators, c], table, [], []])}
-    [neurons, sensors, actuators, [cortex]]
-    input = Scape.generate_input(scape)
+    [neurons_plus_pids, sensors_plus_pids, actuators_plus_pids] = for x <- [neurons, sensors, actuators], do: Enum.map(x, fn y -> %{y | pid: :ets.lookup_element(table, y.id, 2)} end) 
+    cortex_running = %{cortex | pid: spawn(Cortex, :run, [[neurons_plus_pids, sensors_plus_pids, actuators_plus_pids, cortex], table, [], [], self()])}
+    neurons_plus_outs = Enum.map(neurons_plus, fn x -> assign_output_pids(x, table) end)
+    sensors_plus_outs = Enum.map(sensors_plus, fn x -> assign_output_pids(x, table) end)
+    Enum.each(neurons_plus_outs, fn x -> send x.pid, {:update_pids, x.output_pids, cortex_running.pid} end)
+    Enum.each(sensors_plus_outs, fn x -> send x.pid, {:update_pids_sensor, x.output_pids, cortex_running.pid} end)
+    Enum.each(actuators_plus_outs, fn x -> send x.pid, {:update_pids_actuator, cortex_running.pid} end)
+    [neurons_plus_outs, sensors_plus_outs, actuators_plus_outs, [cortex_running]]
     IO.inspect input, label: "input from network module"
     send cortex.pid, {:start, input}
     IO.puts "Error: scape must be an atom, ie :rng"

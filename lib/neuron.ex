@@ -4,7 +4,7 @@ defmodule Neuron do
   Neurons have the format {{:neuron, .37374628}, {weights}}
   """
 
-  defstruct cx_id: nil, id: nil, pid: nil, af: :tanh, input_neurons: [], output_neurons: [], output_pids: nil, index: nil, weights: nil
+  defstruct cx_id: nil, cx_pid: nil, id: nil, pid: nil, af: :tanh, input_neurons: [], output_neurons: [], output_pids: nil, index: nil, weights: nil
 
   @doc"""
   Creates neurons corresponding to the size of nn desired. 
@@ -95,7 +95,7 @@ defmodule Neuron do
                     false -> :ets.new(:input_table, [:set, :private])
                   end
     receive do
-      {:update_pid, pids} -> %{neuron | output_pids: pids}
+      {:update_pids, output_pids, cortex_pid} -> %{neuron | output_pids: output_pids, cx_pid: cortex_pid}
                       |> run(input_table)
       {:ok, {self, message}} -> send self, {:ok, message}
       {:terminate} -> IO.puts "exiting neuron"

@@ -4,7 +4,7 @@ defmodule Interactor do
   We'll use a macro to call the module from the Sensor type.
   """
 
-  defstruct id: nil, pid: nil, cx_id: nil, name: nil, scape: nil, vl: nil, fanout_ids: "no fanouts for actuator", output_pids: nil, fanin_ids: "no fanins for sensor", index: nil
+  defstruct id: nil, pid: nil, cortex_id: nil, cortex_pid: nil, name: nil, scape: nil, vl: nil, fanout_ids: "no fanouts for actuator", output_pids: nil, fanin_ids: "no fanins for sensor", index: nil
 
   defmacro type(morph, interactor) do
     ast = quote do
@@ -41,21 +41,19 @@ defmodule Interactor do
 
   In the case of scape :rng, that message looks approx like this: {:fire, [0.49349, 0.492352]}
   """
-  def run(interactor, genotype, sensor, acc) do
+  def run(interactor, genotype, acc) do
     [n, s, a, [c]] = genotype
     scape = c.scape
     input = Scape.generate_input(scape)
-#   actual_input = input
     {_, actual_input} = input
     receive do
-      {:update_pid, update_sensor} -> run(interactor, genotype, update_sensor, [])
+      {:update_pids_sensor, output_pids, cortex_pid} -> run(interactor, [n, Enum.map(s, fn x -> %{x | output_pids: output_pids, cortex_pid: cortex_pid} end), a, [c]], [])
+      {:update_pids_actuator, cortex_pid} -> run(interactor, [n, s, Enum.map(a, fn x -> %{x | output_pids: cortex_pid, cortex_pid: cortex_pid} end), [c]], [])
       {:start, cortex_pid} -> Enum.each((Enum.at(sensor, 0)).output_pids, fn x -> send x, {:fire, actual_input} end)
                     send cortex_pid, {:sensor_input, {scape, actual_input}} 
-                          # I really should have updated the cx_pid in a better manner. I just sent it in the :update_pid message and assigned it to the acc variable temporarily.
       {:input_vector, incoming_neuron, input} -> case length([input | acc]) == length(Enum.at(a, 0).fanin_ids) do
-                                                   true -> Enum.sum([input | acc])
-                                                           |> IO.inspect(label: 'output from nn')
-                                                   false -> run(interactor, genotype, sensor, [input | acc])
+                                                   true -> Enum.each(a, fn x -> send x.output_pids, {:actuator_output, {x.id, x.name}, Enum.sum([input | acc])} end)
+                                                   false -> run(interactor, genotype, [input | acc])
                                                  end
       {:terminate} -> IO.puts "exiting interactor"
                       Process.exit(self(), :normal)
