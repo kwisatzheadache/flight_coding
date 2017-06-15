@@ -22,21 +22,25 @@ defmodule Network do
   end
 
   def create(type, scape, size) do
-    if is_atom(scape) do
     [c] = Cortex.generate(scape, type)
+    neurons = Neuron.generate(size) #Empty neurons
+    sensors = Interactor.generate(scape, :sensor)
+      |> Enum.map(fn x -> Interactor.fanout_neurons(x, neurons) end)
+    actuators = Interactor.generate(scape, :actuator)
+      |> Enum.map(fn x -> Interactor.fanin_neurons(x, neurons) end)
+    neurons_plus = Neuron.assign_inputs_outputs_and_weights(neurons, sensors, actuators) # Neurons assigned input_neurons, output_neurons, and weights
+                  |> Enum.map(fn x -> %{x | cx_id: c.id} end) # Neurons given cx_id
+    sensors_plus = Enum.map(sensors, fn x -> %{x | cx_id: c.id} end) # Sensors given cx_id
+    actuators_plus = Enum.map(actuators, fn x -> %{x | cx_id: c.id, output_pids: c.id} end) # Actuators given cx_id
+    genotype = [neurons_plus, sensors_plus, actuators_plus, [c]]  
+    genotype
+  end
+
+  def link(genotype) do
+    [neurons, sensors, actuators, [cortex]] = genotype
     table = :ets.new(:table, [:set, :private])
-    n= Neuron.generate(size) #Empty neurons
-    s= Interactor.generate(scape, :sensor)
-      |> Enum.map(fn x -> Interactor.fanout_neurons(x, n) end)
-    a= Interactor.generate(scape, :actuator)
-      |> Enum.map(fn x -> Interactor.fanin_neurons(x, n) end)
-    n1 = Neuron.assign_inputs_outputs_and_weights(n, s, a) # Neurons assigned input_neurons, output_neurons, and weights
-    n2 = Enum.map(n1, fn x -> %{x | cx_id: c.id} end) # Neurons given cx_id
-    s2 = Enum.map(s, fn x -> %{x | cx_id: c.id} end) # Sensors given cx_id
-    a2 = Enum.map(a, fn x -> %{x | cx_id: c.id} end) # Actuators given cx_id
-    genotype = [n2, s2, a2, [c]]  
     gen_pids(genotype, table) # Neurons, sensors, actuators spawned, pids send to :ets table. Fetched in the next line
-    [n3, s3, actuators] = for x <- [n2, s2, a2], do: Enum.map(x, fn y -> %{y | pid: :ets.lookup_element(table, y.id, 2)} end) 
+    [neurons_plus, sensors_plus, actuators_plus] = for x <- [n2, s2, a2], do: Enum.map(x, fn y -> %{y | pid: :ets.lookup_element(table, y.id, 2)} end) 
     neurons = Enum.map(n3, fn x -> assign_output_pids(x, table) end)
     sensors = Enum.map(s3, fn x -> assign_output_pids(x, table) end)
     Enum.each(neurons, fn x -> send x.pid, {:update_pid, x.output_pids} end)
@@ -46,9 +50,7 @@ defmodule Network do
     input = Scape.generate_input(scape)
     IO.inspect input, label: "input from network module"
     send cortex.pid, {:start, input}
-    else
-      IO.puts "Error: scape must be an atom, ie :rng"
-    end
+    IO.puts "Error: scape must be an atom, ie :rng"
   end
 
   def assign_output_pids(unit, table) do
