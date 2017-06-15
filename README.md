@@ -20,14 +20,6 @@ It seems to have resolved, not entirely sure how or what I did.
 At any rate, it all seems to work better now. `Network.create` generates a NN,
 runs the `:xor` scape and outputs a number. Now to begin the training process.
 
-6/14
-It looks like I need to rewrite a bunch of this... The nn tranmission is just too sloppy. 
-I'll probably revert back to yesterdays commit, then rebuild the constructor, separating the 
-genotyper and the PID assignment, so that the processes don't have to be updated. Then
-I'll have to redo some of the `send x.pid` bits to reflect the update.
-The good news is, I understand it all better now. The bad news is I have to rewrite a bunch of code.
-It's good practice though and afterward, it will all be cleaner this way.
-
 ```elixir
 Network.create
 ```
