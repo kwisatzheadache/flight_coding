@@ -22,7 +22,6 @@ defmodule Network do
   end
 
   def create(type, scape, size) do
-    if is_atom(scape) do
     [c] = Cortex.generate(scape, type)
     n= Neuron.generate(size) #Empty neurons
     s= Interactor.generate(scape, :sensor)
@@ -47,9 +46,7 @@ defmodule Network do
     input = Scape.generate_input(scape)
     IO.inspect input, label: "input from network module"
     send cortex.pid, {:start, self()}
-    else
       IO.puts "Error: scape must be an atom, ie :rng"
-    end
     receive do
       {:completion_data, [input, [output], [correct_output]]} -> [input, output, correct_output]
     end
