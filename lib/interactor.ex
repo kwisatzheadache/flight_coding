@@ -47,9 +47,9 @@ defmodule Interactor do
     input = Scape.generate_input(scape)
     {_, actual_input} = input
     receive do
-      {:update_pids_sensor, output_pids, cortex_pid} -> run(interactor, [n, Enum.map(s, fn x -> %{x | output_pids: output_pids, cortex_pid: cortex_pid} end), a, [c]], [])
-      {:update_pids_actuator, cortex_pid} -> run(interactor, [n, s, Enum.map(a, fn x -> %{x | output_pids: cortex_pid, cortex_pid: cortex_pid} end), [c]], [])
-      {:start, cortex_pid} -> Enum.each((Enum.at(sensor, 0)).output_pids, fn x -> send x, {:fire, actual_input} end)
+      {:update_pids_sensor, output_pids, cortex_pid} -> run(interactor, [n, Enum.map(s, fn x -> %{x | output_pids: output_pids, cortex_pid: cortex_pid} end), a, [c]], acc)
+      {:update_pids_actuator, cortex_pid} -> run(interactor, [n, s, Enum.map(a, fn x -> %{x | output_pids: cortex_pid, cortex_pid: cortex_pid} end), [c]], acc)
+      {:start, cortex_pid} -> Enum.each((Enum.at(s, 0)).output_pids, fn x -> send x, {:fire, actual_input} end)
                     send cortex_pid, {:sensor_input, {scape, actual_input}} 
       {:input_vector, incoming_neuron, input} -> case length([input | acc]) == length(Enum.at(a, 0).fanin_ids) do
                                                    true -> Enum.each(a, fn x -> send x.output_pids, {:actuator_output, {x.id, x.name}, Enum.sum([input | acc])} end)
@@ -57,6 +57,7 @@ defmodule Interactor do
                                                  end
       {:terminate} -> IO.puts "exiting interactor"
                       Process.exit(self(), :normal)
+      {:test, _} -> IO.inspect genotype, label: 'interactor genotype'
     end
   end
 end

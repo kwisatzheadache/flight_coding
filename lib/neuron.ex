@@ -4,7 +4,7 @@ defmodule Neuron do
   Neurons have the format {{:neuron, .37374628}, {weights}}
   """
 
-  defstruct cx_id: nil, cx_pid: nil, id: nil, pid: nil, af: :tanh, input_neurons: [], output_neurons: [], output_pids: nil, index: nil, weights: nil
+  defstruct cortex_id: nil, cortex_pid: nil, id: nil, pid: nil, af: :tanh, input_neurons: [], output_neurons: [], output_pids: nil, index: nil, weights: nil
 
   @doc"""
   Creates neurons corresponding to the size of nn desired. 
@@ -95,9 +95,8 @@ defmodule Neuron do
                     false -> :ets.new(:input_table, [:set, :private])
                   end
     receive do
-      {:update_pids, output_pids, cortex_pid} -> %{neuron | output_pids: output_pids, cx_pid: cortex_pid}
+      {:update_pids, output_pids, cortex_pid} -> %{neuron | output_pids: output_pids, cortex_pid: cortex_pid}
                       |> run(input_table)
-      {:ok, {self, message}} -> send self, {:ok, message}
       {:terminate} -> IO.puts "exiting neuron"
                       Process.exit(self(), :normal)
       {:fire, input_vector} -> Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(input_vector, neuron.weights)})
@@ -108,7 +107,7 @@ defmodule Neuron do
                 run(neuron, input_table)
               false -> run(neuron, input_table)
             end
-      {:test, _} -> IO.puts "neuron receiving test signal"
+      {:test, _} -> IO.inspect neuron, label: 'neuron inspection'
                       run(neuron, input_table)
     end
   end
