@@ -1,3 +1,7 @@
+# NOTICE
+
+This branch has been merged to become master. I'm resuming progress on the master branch, so this is the end of progress on `separate_creation` branch.
+
 # NnFlightCoding
 
 What started as an exercise to pass the time while in flight over the Atlantic, has begun the construction,
