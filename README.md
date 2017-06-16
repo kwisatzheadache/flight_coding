@@ -3,8 +3,7 @@
 What started as an exercise to pass the time while in flight over the Atlantic, has begun the construction,
 from scratch, of a functional Neural Net constructor.
 
-I will endeavor to ensure that the simple command ``` Network.create ``` will show off the extent of this 
-project's capacities. Please, feel free to fork and pick up wherever I leave off.
+`mix test` runs a trainer over a simple ffnn for 30 iterations.
 
 ## Currently, 
 
@@ -19,8 +18,7 @@ time to take another crack at training.
 
 
 ```elixir
-geno = Network.create
-Network.link_and_update(geno)
+Train.genotype(30)
 ```
 
 ## Installation

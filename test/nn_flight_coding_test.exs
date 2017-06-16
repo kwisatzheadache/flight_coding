@@ -3,6 +3,6 @@ defmodule NnFlightCodingTest do
   doctest NnFlightCoding
 
   test "What can I do?" do
-    Network.create
+    Train.genotype(30)
   end
 end
