@@ -19,4 +19,12 @@ defmodule Weights do
     vl = length(neuron.input_neurons) + 1
     %{neuron | weights: generate(vl, [])}
   end
+
+  def update(neuron) do
+    %{neuron | weights: Enum.map(neuron.weights, fn x -> perturb(x) end)}
+  end
+
+  def perturb(weight) do
+    weight + (:random.uniform() / 30)
+  end
 end

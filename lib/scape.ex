@@ -35,14 +35,14 @@ defmodule Scape do
     end
   end
 
-
+# note - change xor to be random
   def xor(call) do
     value = Enum.random([0, 1, 2, 3])
     xor_data = [{[1, 1], [-1]},
                  {[1, -1], [1]},
                  {[-1, 1], [1]},
                  {[-1, -1], [-1]}]
-    {input, correct_output} = Enum.at(xor_data, value)
+    {input, correct_output} = Enum.at(xor_data, 1)
     case call do
       :input -> {:xor, input}
       :output -> correct_output

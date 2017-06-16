@@ -36,7 +36,7 @@ defmodule Network do
     genotype
   end
 
-  def link_and_update(genotype) do
+  def link_and_process(genotype) do
     [neurons, sensors, actuators, [cortex]] = genotype
     table = :ets.new(:table, [:set, :private])
     gen_pids(genotype, table) # Neurons, sensors, actuators spawned, pids send to :ets table. Fetched in the next line
@@ -51,7 +51,8 @@ defmodule Network do
 #   send cortex_running.pid, {:test, 9}
     send cortex_running.pid, {:start, 9}
     receive do
-      {:nn_output, generated_input, correct_output, output} -> [generated_input, correct_output, output]
+      {:nn_output, generated_input, [correct_output], output} -> [generated_input, correct_output, output]# [{:generated_input, generated_input}, {:correct_output, correct_output}, {:output, output}]
+        # Transmit.list(genotype, {:terminate, _})
     end
 #   [neurons_plus_outs, sensors_plus_outs, actuators_plus_outs, [cortex_running]]
   end

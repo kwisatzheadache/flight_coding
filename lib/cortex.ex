@@ -23,7 +23,6 @@ defmodule Cortex do
         run(genotype, table, [], [], network_pid)
       {:sensor_input, {scape, input}} -> run(genotype, table, input, Scape.get_output(c.scape, input), network_pid)
       {:actuator_output, {actuator_id, actuator_name}, output} -> send network_pid, {:nn_output, generated_input, correct_output, output}
-        IO.inspect [generated_input, correct_output, output], label: 'gen_input, correct_input, output'
         run(genotype, table, generated_input, correct_output, network_pid)
       {:test, :actuator} -> IO.puts "received from actuator"
         run(genotype, table, generated_input, correct_output, network_pid)
