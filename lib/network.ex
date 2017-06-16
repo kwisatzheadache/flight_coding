@@ -48,7 +48,12 @@ defmodule Network do
     Enum.each(neurons_plus_outs, fn x -> send x.pid, {:update_pids, x.output_pids, cortex_running.pid} end)
     Enum.each(sensors_plus_outs, fn x -> send x.pid, {:update_pids_sensor, x.output_pids, cortex_running.pid} end)
     Enum.each(actuators_plus_outs, fn x -> send x.pid, {:update_pids_actuator, cortex_running.pid} end)
-    [neurons_plus_outs, sensors_plus_outs, actuators_plus_outs, [cortex_running]]
+#   send cortex_running.pid, {:test, 9}
+    send cortex_running.pid, {:start, 9}
+    receive do
+      {:nn_output, generated_input, correct_output, output} -> [generated_input, correct_output, output]
+    end
+#   [neurons_plus_outs, sensors_plus_outs, actuators_plus_outs, [cortex_running]]
   end
 
   def assign_output_pids(unit, table) do

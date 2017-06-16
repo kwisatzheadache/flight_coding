@@ -96,19 +96,20 @@ defmodule Neuron do
                   end
     receive do
       {:update_pids, output_pids, cortex_pid} -> %{neuron | output_pids: output_pids, cortex_pid: cortex_pid}
-                      |> run(input_table)
-      {:terminate} -> IO.puts "exiting neuron"
-                      Process.exit(self(), :normal)
+        |> run(input_table)
       {:fire, input_vector} -> Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(input_vector, neuron.weights)})
-      {:input_vector, incoming_neuron, input} -> 
-          :ets.insert(input_table, {incoming_neuron, input})
-            case :ets.info(input_table, :size) == length(neuron.input_neurons) do
-              true  -> Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(Enum.map(neuron.input_neurons, fn x -> :ets.lookup_element(input_table, x, 2) end), neuron.weights)})
-                run(neuron, input_table)
-              false -> run(neuron, input_table)
-            end
-      {:test, _} -> IO.inspect neuron, label: 'neuron inspection'
-                      run(neuron, input_table)
+        run(neuron, table)
+      {:input_vector, incoming_neuron, input} -> :ets.insert(input_table, {incoming_neuron, input})
+        case :ets.info(input_table, :size) == length(neuron.input_neurons) do
+          true  -> Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(Enum.map(neuron.input_neurons, fn x -> :ets.lookup_element(input_table, x, 2) end), neuron.weights)})
+            run(neuron, input_table)
+          false -> run(neuron, input_table)
+        end
+        run(neuron, table)
+      {:test, _} -> Transmit.neurons(neuron.output_pids, {:test, :neuron})
+        run(neuron, input_table)
+      {:terminate} -> IO.puts "exiting neuron"
+        Process.exit(self(), :normal)
     end
   end
 

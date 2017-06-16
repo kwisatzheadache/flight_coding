@@ -48,16 +48,23 @@ defmodule Interactor do
     {_, actual_input} = input
     receive do
       {:update_pids_sensor, output_pids, cortex_pid} -> run(interactor, [n, Enum.map(s, fn x -> %{x | output_pids: output_pids, cortex_pid: cortex_pid} end), a, [c]], acc)
-      {:update_pids_actuator, cortex_pid} -> run(interactor, [n, s, Enum.map(a, fn x -> %{x | output_pids: cortex_pid, cortex_pid: cortex_pid} end), [c]], acc)
+      {:update_pids_actuator, cortex_pid} -> run(interactor, [n, s, Enum.map(a, fn x -> %{x | output_pids: cortex_pid, cortex_pid: cortex_pid} end), [%{c | pid: cortex_pid}]], acc)
       {:start, cortex_pid} -> Enum.each((Enum.at(s, 0)).output_pids, fn x -> send x, {:fire, actual_input} end)
-                    send cortex_pid, {:sensor_input, {scape, actual_input}} 
+        send cortex_pid, {:sensor_input, {scape, actual_input}} 
+        run(interactor, genotype, acc)
       {:input_vector, incoming_neuron, input} -> case length([input | acc]) == length(Enum.at(a, 0).fanin_ids) do
                                                    true -> Enum.each(a, fn x -> send x.output_pids, {:actuator_output, {x.id, x.name}, Enum.sum([input | acc])} end)
+                                                      run(interactor, genotype, [])
+                                                      # Not sure if I should run() with the input or an empty acc 
                                                    false -> run(interactor, genotype, [input | acc])
                                                  end
+      {:test, :neuron} -> IO.inspect c.pid, label: 'actuator c.pid'
+        send c.pid, {:test, :actuator}
+        run(interactor, genotype, acc)
+      {:test, _} ->  Transmit.neurons(Enum.at(s, 0).output_pids, {:test, 9})
+        run(interactor, genotype, acc)
       {:terminate} -> IO.puts "exiting interactor"
-                      Process.exit(self(), :normal)
-      {:test, _} -> IO.inspect genotype, label: 'interactor genotype'
+        Process.exit(self(), :normal)
     end
   end
 end

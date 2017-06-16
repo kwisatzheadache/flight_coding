@@ -13,15 +13,14 @@ It is fully functioning as a genotype generator.
 Furthermore, the genotype is automatically started in a process so that it can be accessed quickly, 
 rather than passing it in each function call.
 
-6/13
-Ran into a very strange issue with the Scape.generate_input(scape) function.
-It seems to have resolved, not entirely sure how or what I did.
+6/15
+Separated the genotype creation and linkage. Network now processes input.
+time to take another crack at training.
 
-At any rate, it all seems to work better now. `Network.create` generates a NN,
-runs the `:xor` scape and outputs a number. Now to begin the training process.
 
 ```elixir
-Network.create
+geno = Network.create
+Network.link_and_update(geno)
 ```
 
 ## Installation
