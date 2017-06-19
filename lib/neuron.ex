@@ -89,26 +89,30 @@ defmodule Neuron do
   end
 
   def run(neuron, table) do
-    acc = []
     input_table = case is_integer(table) do
                     true -> table
-                    false -> :ets.new(:input_table, [:set, :private])
+                    false -> :ets.new(:table, [:set, :private])
                   end
     receive do
       {:update_pids, output_pids, cortex_pid} -> %{neuron | output_pids: output_pids, cortex_pid: cortex_pid}
         |> run(input_table)
       {:fire, input_vector} -> Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(input_vector, neuron.weights)})
-        run(neuron, table)
+        run(neuron, input_table)
       {:input_vector, incoming_neuron, input} -> :ets.insert(input_table, {incoming_neuron, input})
         case :ets.info(input_table, :size) == length(neuron.input_neurons) do
           true  -> Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(Enum.map(neuron.input_neurons, fn x -> :ets.lookup_element(input_table, x, 2) end), neuron.weights)})
-            run(neuron, input_table)
+            IO.inspect length(:ets.all), label: 'ets tables'
+            :ets.delete(input_table)
+            IO.inspect length(:ets.all), label: "ets tables"
+            Process.exit(self(), :normal)
+            # run(neuron, nil)
           false -> run(neuron, input_table)
         end
-        run(neuron, table)
+        run(neuron, input_table)
       {:test, _} -> Transmit.neurons(neuron.output_pids, {:test, :neuron})
         run(neuron, input_table)
       {:terminate} -> IO.puts "exiting neuron"
+              :ets.delete(table)
         Process.exit(self(), :normal)
     end
   end
