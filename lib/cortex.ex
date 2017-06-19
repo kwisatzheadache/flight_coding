@@ -1,10 +1,12 @@
 defmodule Cortex do
   @moduledoc"""
+  Cortex begins the network - it sends initiatory signals to sensors, receives output - which is relayed to the network - then terminates all nodes.
   """
 
   defstruct id: nil, pid: nil, scape: nil, type: :ffnn
 
   @doc"""
+  Used to in the genotyping stage. I guess, it's somewhat unimportant, except that the scape is set here, as well as the type. 
   """
   def generate(scape, type) do
     case is_atom(scape) and is_atom(type) do

@@ -11,13 +11,18 @@ defmodule Interactor do
             {{:., [], [{:__aliases__, [alias: false], [:Morphology]}, :set]}, [], [unquote(morph), unquote(interactor)]}
           end
   end
+
   @doc"""
+  Called in the genotype stage
   """
   def generate(morph, interactor) do
     {ast_eval, []} = Code.eval_quoted(type(morph, interactor))
     ast_eval
   end
 
+  @doc"""
+  Neuron ids that send info to current neuron
+  """
   def fanin_neurons(actuator, neurons) do
     max = Enum.map(neurons, fn x -> x.index end)
     |> Enum.max
@@ -26,6 +31,9 @@ defmodule Interactor do
     %{actuator | fanin_ids: fanin_ids}
   end
 
+  @doc"""
+  Neuron or sensor sends output to these neurons
+  """
   def fanout_neurons(sensor, neurons) do
     fanouts = Enum.filter(neurons, fn x -> x.index == 1 end)
     fanout_ids = Enum.map(fanouts, fn x -> x.id end)

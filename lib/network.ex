@@ -21,6 +21,8 @@ defmodule Network do
     create(:ffnn, :xor, :medium)
   end
 
+  @doc"""
+  """
   def create(type, scape, size) do
     [c] = Cortex.generate(scape, type)
     neurons = Neuron.generate(size) #Empty neurons
@@ -44,17 +46,15 @@ defmodule Network do
     cortex_running = %{cortex | pid: spawn(Cortex, :run, [[neurons_plus_pids, sensors_plus_pids, actuators_plus_pids, cortex], table, [], [], self()])}
     neurons_plus_outs = Enum.map(neurons_plus_pids, fn x -> assign_output_pids(x, table) end)
     sensors_plus_outs = Enum.map(sensors_plus_pids, fn x -> assign_output_pids(x, table) end)
+    :ets.delete(table)
     actuators_plus_outs = Enum.map(actuators_plus_pids, fn x -> %{x | output_pids: cortex_running.pid} end)
     Enum.each(neurons_plus_outs, fn x -> send x.pid, {:update_pids, x.output_pids, cortex_running.pid} end)
     Enum.each(sensors_plus_outs, fn x -> send x.pid, {:update_pids_sensor, x.output_pids, cortex_running.pid} end)
     Enum.each(actuators_plus_outs, fn x -> send x.pid, {:update_pids_actuator, cortex_running.pid} end)
-#   send cortex_running.pid, {:test, 9}
     send cortex_running.pid, {:start, 9}
     receive do
       {:nn_output, generated_input, [correct_output], output} -> [generated_input, correct_output, output]# [{:generated_input, generated_input}, {:correct_output, correct_output}, {:output, output}]
-        # Transmit.list(genotype, {:terminate, _})
     end
-#   [neurons_plus_outs, sensors_plus_outs, actuators_plus_outs, [cortex_running]]
   end
 
   def assign_output_pids(unit, table) do
