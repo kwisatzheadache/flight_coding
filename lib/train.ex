@@ -18,7 +18,7 @@ defmodule Train do
       [input_perturbed, correct_output_perturbed, output_perturbed] = Network.link_and_process(geno_perturbed)
       fitness_perturbed = (correct_output_perturbed - output_perturbed)
       delta = fitness_initial - fitness_perturbed
-      IO.inspect [{:count, iterations}, {:input, input}, {:output, output}, {:fitness, fitness_initial}]
+      IO.inspect [{:input, input}, {:output, output}, {:fitness, fitness_initial}]
       case delta >= 0 do
         true -> network(geno_perturbed, iterations - 1)
         false -> network(geno_initial, iterations - 1)
