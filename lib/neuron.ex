@@ -88,29 +88,22 @@ defmodule Neuron do
     end
   end
 
-  def run(neuron, table) do
-    input_table = case is_integer(table) do
-                    true -> table
-                    false -> :ets.new(:table, [:set, :private])
-                  end
+  def run(neuron, acc) do
     receive do
       {:update_pids, output_pids, cortex_pid} -> %{neuron | output_pids: output_pids, cortex_pid: cortex_pid}
-        |> run(input_table)
+        |> run(acc)
       {:fire, input_vector} -> Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(input_vector, neuron.weights)})
-        run(neuron, input_table)
-      {:input_vector, incoming_neuron, input} -> :ets.insert(input_table, {incoming_neuron, input})
-        case :ets.info(input_table, :size) == length(neuron.input_neurons) do
-          true  -> Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(Enum.map(neuron.input_neurons, fn x -> :ets.lookup_element(input_table, x, 2) end), neuron.weights)})
-            :ets.delete(input_table)
-            Process.exit(self(), :normal)
-            # run(neuron, nil)
-          false -> run(neuron, input_table)
+        run(neuron, acc)
+      {:input_vector, incoming_neuron, input} -> input_list = [{incoming_neuron, input} | acc]
+        case length(input_list) == length(neuron.input_neurons) do
+            true -> input_vector = Enum.map(neuron.input_neurons, fn x -> Enum.find(input_list, fn {incoming_neuron, input} -> x == incoming_neuron end) end)
+              |> Enum.map(fn {incoming_neuron, input} -> input end)
+              Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(input_vector, neuron.weights)})
+            false -> run(neuron, input_list)
         end
-        run(neuron, input_table)
       {:test, _} -> Transmit.neurons(neuron.output_pids, {:test, :neuron})
-        run(neuron, input_table)
+        run(neuron, acc)
       {:terminate} -> IO.puts "exiting neuron"
-              :ets.delete(table)
         Process.exit(self(), :normal)
     end
   end

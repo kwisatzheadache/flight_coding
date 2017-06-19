@@ -13,9 +13,7 @@ Furthermore, the genotype is automatically started in a process so that it can b
 rather than passing it in each function call.
 
 6/19
-Genotype is training - with a few caveats. Current issue is the :ets tables. They should be deleted each iteration, 
-so that the db limit is never reached. However, this doesn't seem to be the case. Exploring :ets management as well
-as moving away from :ets entirely for neurons.
+Genotype is training - with a few caveats. :ets issue has been resolved. Network can now train epochs greater than 250.
 
 
 ```elixir
@@ -40,7 +38,7 @@ be found at [https://hexdocs.pm/nn_flight_coding](https://hexdocs.pm/nn_flight_c
 ## TODO
 
 - ~~Bring Documentation up to date~~
-- Change neuron ETS to avoid db overflow
+- ~~Change neuron ETS to avoid db overflow~~
 - Add biases
 - Add random weight generation to avoid getting stuck at local maximum
 - Train over all 3 inputs of XOR
