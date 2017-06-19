@@ -12,9 +12,10 @@ It is fully functioning as a genotype generator.
 Furthermore, the genotype is automatically started in a process so that it can be accessed quickly, 
 rather than passing it in each function call.
 
-6/15
-Separated the genotype creation and linkage. Network now processes input.
-time to take another crack at training.
+6/19
+Genotype is training - with a few caveats. Current issue is the :ets tables. They should be deleted each iteration, 
+so that the db limit is never reached. However, this doesn't seem to be the case. Exploring :ets management as well
+as moving away from :ets entirely for neurons.
 
 
 ```elixir
