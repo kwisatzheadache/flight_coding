@@ -29,6 +29,10 @@ defmodule Weights do
   end
 
   def perturb(weight) do
-    weight + (:random.uniform() / 30)
+    if :random.uniform() <= 0.1 do
+      :random.uniform()
+    else
+      weight + (:random.uniform() / 30)
+    end
   end
 end

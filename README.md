@@ -40,7 +40,7 @@ be found at [https://hexdocs.pm/nn_flight_coding](https://hexdocs.pm/nn_flight_c
 - ~~Bring Documentation up to date~~
 - ~~Change neuron ETS to avoid db overflow~~
 - ~~Add bias~~
-- Add random weight generation to avoid getting stuck at local maximum
+- ~~Add random weight generation to avoid getting stuck at local maximum~~
 - Train over all 3 inputs of XOR
 - Add other network types (aside form FFNN)
 
