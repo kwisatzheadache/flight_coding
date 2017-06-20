@@ -15,6 +15,10 @@ defmodule Weights do
     end
   end
 
+  def bias do
+    :random.uniform()
+  end
+
   def assign(neuron) do
     vl = length(neuron.input_neurons) + 1
     %{neuron | weights: generate(vl, [])}

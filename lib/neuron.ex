@@ -98,7 +98,8 @@ defmodule Neuron do
         case length(input_list) == length(neuron.input_neurons) do
             true -> input_vector = Enum.map(neuron.input_neurons, fn x -> Enum.find(input_list, fn {incoming_neuron, input} -> x == incoming_neuron end) end)
               |> Enum.map(fn {incoming_neuron, input} -> input end)
-              Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(input_vector, neuron.weights)})
+              input_vector_with_bias = List.flatten([input_vector, 1])
+              Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(input_vector_with_bias, neuron.weights)})
             false -> run(neuron, input_list)
         end
       {:test, _} -> Transmit.neurons(neuron.output_pids, {:test, :neuron})
@@ -111,6 +112,10 @@ defmodule Neuron do
   def af(input_vector, weights) do
     dot = dot(input_vector, weights, [], 0)
     :math.tanh(dot)
+  end
+
+  def dot(a, b) do
+    dot(a, b, [], 0)
   end
 
   def dot(matrix1, matrix2, acc, counter) do
