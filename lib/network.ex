@@ -51,7 +51,7 @@ defmodule Network do
     Enum.each(neurons_plus_outs, fn x -> send x.pid, {:update_pids, x.output_pids, cortex_running.pid} end)
     Enum.each(sensors_plus_outs, fn x -> send x.pid, {:update_pids_sensor, x.output_pids, cortex_running.pid} end)
     Enum.each(actuators_plus_outs, fn x -> send x.pid, {:update_pids_actuator, cortex_running.pid} end)
-    send cortex_running.pid, {:start, 9}
+    send cortex_running.pid, {:start, Scape.get_count(cortex_running.scape)}
     receive do
       {:nn_output, generated_input, [correct_output], output} -> [generated_input, correct_output, output]# [{:generated_input, generated_input}, {:correct_output, correct_output}, {:output, output}]
     end

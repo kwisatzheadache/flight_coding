@@ -12,8 +12,8 @@ It is fully functioning as a genotype generator.
 Furthermore, the genotype is automatically started in a process so that it can be accessed quickly, 
 rather than passing it in each function call.
 
-6/19
-Genotype is training - with a few caveats. :ets issue has been resolved. Network can now train epochs greater than 250.
+6/20
+Updating Cortex so that it cycles through the scape_count... In the case of XOR, 100 iterations. Figuring out how to fetch input, run the nn, store input, then rerun the entire thing.
 
 
 ```elixir
@@ -43,6 +43,7 @@ be found at [https://hexdocs.pm/nn_flight_coding](https://hexdocs.pm/nn_flight_c
 - ~~Add random weight generation to avoid getting stuck at local maximum~~
 - Train over all 3 inputs of XOR
 - Add other network types (aside form FFNN)
+- Scape to encode output
 
 ## License
 

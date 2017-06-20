@@ -52,12 +52,12 @@ defmodule Interactor do
   def run(interactor, genotype, acc) do
     [n, s, a, [c]] = genotype
     scape = c.scape
-    input = Scape.generate_input(scape)
-    {_, actual_input} = input
     receive do
       {:update_pids_sensor, output_pids, cortex_pid} -> run(interactor, [n, Enum.map(s, fn x -> %{x | output_pids: output_pids, cortex_pid: cortex_pid} end), a, [c]], acc)
       {:update_pids_actuator, cortex_pid} -> run(interactor, [n, s, Enum.map(a, fn x -> %{x | output_pids: cortex_pid, cortex_pid: cortex_pid} end), [%{c | pid: cortex_pid}]], acc)
-      {:start, cortex_pid} -> Enum.each((Enum.at(s, 0)).output_pids, fn x -> send x, {:fire, actual_input} end)
+      {:start, cortex_pid, training_counter} -> input = Scape.generate_input(scape, training_counter)
+        {_, actual_input} = input
+        Enum.each((Enum.at(s, 0)).output_pids, fn x -> send x, {:fire, actual_input} end)
         send cortex_pid, {:sensor_input, {scape, actual_input}} 
         run(interactor, genotype, acc)
       {:input_vector, incoming_neuron, input} -> case length([input | acc]) == length(Enum.at(a, 0).fanin_ids) do
