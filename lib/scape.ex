@@ -46,7 +46,7 @@ defmodule Scape do
 
 # note - change xor to be random
   def xor(call, counter) do
-    value = rem(counter, 4)
+    value = Enum.random([0, 1, 2, 3])
     xor_data = [{[1, 1], [-1]},
                  {[1, -1], [1]},
                  {[-1, 1], [1]},

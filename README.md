@@ -15,6 +15,8 @@ rather than passing it in each function call.
 6/20
 Trainer is working properly now, cortex updated so that it cycles trhough properly. Problem with geno producing different outputs.... I think it's because the inputs are different each time... i.e. - xor is selected randomly. I need to change that.
 
+Upon closer inspection, it seems that removing the randomness constricts the network, reducting error variance completely. Not sure why. But I'll look into the randomness impact more next time.
+
 ```elixir
 Train.genotype(30)
 ```
