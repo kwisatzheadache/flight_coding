@@ -4,7 +4,7 @@ defmodule Scape do
   """
   defmacro scape_to_call(scape, call, counter) do
     ast = quote do
-            {{:., [], [{:__aliases__, [alias: false], [:Scape]}, unquote(scape)]}, [], [unquote(call), unquote[counter]]}
+            {{:., [], [{:__aliases__, [alias: false], [:Scape]}, unquote(scape)]}, [], [unquote(call), unquote(counter)]}
           end
   end
 
@@ -17,8 +17,15 @@ defmodule Scape do
     input
   end
 
-  def get_count(cortex) do
-    count = case cortex.scape do
+  def process_output(output) do
+    case :math.tanh(output) >= 0  do
+      true -> 1
+      false -> -1
+    end
+  end
+
+  def get_count(scape) do
+    count = case scape do
               :xor -> 100
             end
   end

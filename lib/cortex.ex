@@ -20,24 +20,43 @@ defmodule Cortex do
   run/5
   """
   # Perhaps run each iteration of input/output in a case clause? 
-end
-  def run(genotype, table, generated_input_table, correct_output_table, network_pid, training_counter) do
-    [n, s, a, [c]] = genotype
+  # run/4
+  def run(genotype, network_pid, table) do
     receive do
-      {:start, counter} ->
-        Transmit.list(:sensors, genotype, {:start, self(), counter})
-        run(genotype, table, [], [], network_pid, counter - 1)
-      {:sensor_input, {scape, input}} -> run(genotype, table, [input | generated_input_table], [Scape.get_output(c.scape, input) | correct_output_table], network_pid)
-      {:actuator_output, {actuator_id, actuator_name}, output} -> send network_pid, {:nn_output, generated_input, correct_output, output}
-        run(genotype, table, generated_input, correct_output, network_pid)
-      {:test, :actuator} -> IO.puts "received from actuator"
-        run(genotype, table, generated_input, correct_output, network_pid)
-      {:test, _} -> Transmit.list(:sensors, genotype, {:test, 4})
-        run(genotype, table, generated_input, correct_output, network_pid)
+      {:start, counter} -> iterate(genotype, counter, network_pid, [], [], :start)
       {:terminate, _} -> Process.exit(self(), :kill)
     end
-    if training_counter > 0 do
-    Transmit.list(:sensors, genotype, {:start, self(), training_counter})
+  end
+
+  # run/6
+  def iterate(genotype, counter, network_pid, table, acc, state) do
+    [n, s, a, c] = genotype
+    if counter == 0 do
+      finish(genotype, network_pid, table)
+    else
+      case state do
+        :start -> Transmit.list(:sensors, genotype, {:start, self(), counter})
+        :wait -> :ok
+      end
+      receive do
+        {:sensor_input, {scape, input}} -> 
+          iterate(genotype, counter, network_pid, table, {counter, input, Scape.get_output(c.scape, input)}, :wait)
+        {:actuator_output, {actuator_id, actuator_name}, output} -> 
+          # send network_pid, {:nn_output, generated_input, correct_output, output}
+          {counter, acc_input, acc_output} = acc
+          iterate(genotype, counter - 1, network_pid, [{counter, acc_input, acc_output, output} | table], [], :start)
+        {:terminate, _} -> Process.exit(self(), :kill)
+      end
     end
+  end
+
+  def finish(genotype, network_pid, table) do
+    # table is list of tuples... {count, input, corr_output, output}
+    total_wrong = Enum.sum(Enum.map(table, fn {count, input, [corr_out], out} -> case corr_out == out do
+                                                                   true -> 0
+                                                                   false -> 1
+                                                                 end end))
+    error = total_wrong / length(table)
+    send network_pid, {:nn_error, error, length(table)}
   end
 end

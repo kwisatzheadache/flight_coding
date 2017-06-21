@@ -13,8 +13,7 @@ Furthermore, the genotype is automatically started in a process so that it can b
 rather than passing it in each function call.
 
 6/20
-Updating Cortex so that it cycles through the scape_count... In the case of XOR, 100 iterations. Figuring out how to fetch input, run the nn, store input, then rerun the entire thing.
-With this update, it is noted that the scape must now provide a count number, corresponding to the size of the training set.
+Trainer is working properly now, cortex updated so that it cycles trhough properly. Problem with geno producing different outputs.... I think it's because the inputs are different each time... i.e. - xor is selected randomly. I need to change that.
 
 ```elixir
 Train.genotype(30)

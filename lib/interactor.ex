@@ -61,16 +61,11 @@ defmodule Interactor do
         send cortex_pid, {:sensor_input, {scape, actual_input}} 
         run(interactor, genotype, acc)
       {:input_vector, incoming_neuron, input} -> case length([input | acc]) == length(Enum.at(a, 0).fanin_ids) do
-                                                   true -> Enum.each(a, fn x -> send x.output_pids, {:actuator_output, {x.id, x.name}, :math.tanh((Enum.sum([input | acc])) / (length([input | acc])))} end)
+                                                   true -> Enum.each(a, fn x -> send x.output_pids, {:actuator_output, {x.id, x.name}, Scape.process_output((Enum.sum([input | acc])) / (length([input | acc])))} end)
                                                       run(interactor, genotype, [])
                                                       # Not sure if I should run() with the input or an empty acc 
                                                    false -> run(interactor, genotype, [input | acc])
                                                  end
-      {:test, :neuron} -> IO.inspect c.pid, label: 'actuator c.pid'
-        send c.pid, {:test, :actuator}
-        run(interactor, genotype, acc)
-      {:test, _} ->  Transmit.neurons(Enum.at(s, 0).output_pids, {:test, 9})
-        run(interactor, genotype, acc)
       {:terminate} -> IO.puts "exiting interactor"
         Process.exit(self(), :normal)
     end

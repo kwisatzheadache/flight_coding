@@ -100,6 +100,7 @@ defmodule Neuron do
               |> Enum.map(fn {incoming_neuron, input} -> input end)
               input_vector_with_bias = List.flatten([input_vector, 1])
               Transmit.neurons(neuron.output_pids, {:input_vector, neuron.id, af(input_vector_with_bias, neuron.weights)})
+              run(neuron, [])
             false -> run(neuron, input_list)
         end
       {:test, _} -> Transmit.neurons(neuron.output_pids, {:test, :neuron})

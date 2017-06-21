@@ -43,7 +43,7 @@ defmodule Network do
     table = :ets.new(:table, [:set, :private])
     gen_pids(genotype, table) # Neurons, sensors, actuators spawned, pids send to :ets table. Fetched in the next line
     [neurons_plus_pids, sensors_plus_pids, actuators_plus_pids] = for x <- [neurons, sensors, actuators], do: Enum.map(x, fn y -> %{y | pid: :ets.lookup_element(table, y.id, 2)} end) 
-    cortex_running = %{cortex | pid: spawn(Cortex, :run, [[neurons_plus_pids, sensors_plus_pids, actuators_plus_pids, cortex], table, [], [], self()])}
+    cortex_running = %{cortex | pid: spawn(Cortex, :run, [[neurons_plus_pids, sensors_plus_pids, actuators_plus_pids, cortex], self(), []])}
     neurons_plus_outs = Enum.map(neurons_plus_pids, fn x -> assign_output_pids(x, table) end)
     sensors_plus_outs = Enum.map(sensors_plus_pids, fn x -> assign_output_pids(x, table) end)
     :ets.delete(table)
@@ -53,7 +53,7 @@ defmodule Network do
     Enum.each(actuators_plus_outs, fn x -> send x.pid, {:update_pids_actuator, cortex_running.pid} end)
     send cortex_running.pid, {:start, Scape.get_count(cortex_running.scape)}
     receive do
-      {:nn_output, generated_input, [correct_output], output} -> [generated_input, correct_output, output]# [{:generated_input, generated_input}, {:correct_output, correct_output}, {:output, output}]
+      {:nn_error, error, training_size} -> [{:error, error}, {:training_size, training_size}]
     end
   end
 
