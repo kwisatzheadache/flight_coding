@@ -14,7 +14,7 @@ rather than passing it in each function call.
 
 6/20
 Updating Cortex so that it cycles through the scape_count... In the case of XOR, 100 iterations. Figuring out how to fetch input, run the nn, store input, then rerun the entire thing.
-
+With this update, it is noted that the scape must now provide a count number, corresponding to the size of the training set.
 
 ```elixir
 Train.genotype(30)
